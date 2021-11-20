@@ -4,4 +4,5 @@
 export const config = {
 	algorithms: ['HS256' as const],
 	secret: 'shhhh', // TODO Put in process.env
+	publicURI: 'http://localhost:8000/'
 };

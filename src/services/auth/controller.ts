@@ -2,6 +2,7 @@ import { recoverPersonalSignature } from 'eth-sig-util';
 import { bufferToHex } from 'ethereumjs-util';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid'
 
 import { config } from '../../config';
 import { User } from '../../models/user.model';
@@ -78,25 +79,27 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 				return user.save();
 			})
 			////////////////////////////////////////////////////
-			// Step 4: Create JWT
+			// Step 4: Create JWTs
+			////////////////////////////////////////////////////
+			// ---
+			////////////////////////////////////////////////////
+			// Step 4a: Create Refresh Token JWT
 			////////////////////////////////////////////////////
 			.then((user: User) => {
-				return new Promise<string>((resolve, reject) =>
+				return new Promise<any>((resolve, reject) =>
 					// https://github.com/auth0/node-jsonwebtoken
 					jwt.sign(
 						{
-							payload: {
-								id: user.id,
-								publicAddress,
-							},
-							"https://hasura.io/jwt/claims": {
-								"x-hasura-user-id": publicAddress,
-								"x-hasura-default-role": "user"
-							}
+							typ: "Refresh",
 						},
 						config.secret,
 						{
 							algorithm: config.algorithms[0],
+							expiresIn: '2d',
+							audience: config.publicURI,
+							issuer: config.publicURI,
+							jwtid: uuid(),
+							subject: publicAddress
 						},
 						(err, token) => {
 							if (err) {
@@ -105,12 +108,117 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							if (!token) {
 								return new Error('Empty token');
 							}
-							return resolve(token);
+							const tokens = {
+								refreshToken: {
+									token
+								}
+							}
+							return resolve({ user, tokens });
 						}
 					)
 				);
 			})
-			.then((accessToken: string) => res.json({ accessToken }))
+			////////////////////////////////////////////////////
+			// Step 4b: Create Id Token JWT
+			////////////////////////////////////////////////////
+			.then((options: { user: User, tokens: { refreshToken: { token: string } } }) => {
+				return new Promise<any>((resolve, reject) =>
+					// https://github.com/auth0/node-jsonwebtoken
+					jwt.sign(
+						{
+							publicAddress,
+							username: options.user.username || publicAddress,
+							typ: "Id",
+						},
+						config.secret,
+						{
+							algorithm: config.algorithms[0],
+							expiresIn: '2d',
+							audience: config.publicURI,
+							issuer: config.publicURI,
+							jwtid: uuid(),
+							subject: publicAddress
+						},
+						(err, idToken) => {
+							if (err) {
+								return reject(err);
+							}
+							if (!idToken) {
+								return new Error('Empty token');
+							}
+							const newTokens = {
+								...options.tokens,
+								idToken: {
+									token: idToken
+								}
+							}
+							return resolve({ user: options.user, tokens: newTokens });
+						}
+					)
+				);
+			})
+			////////////////////////////////////////////////////
+			// Step 4c: Create Access Token JWT
+			////////////////////////////////////////////////////
+			.then((options: {
+				user: User,
+				tokens: {
+					refreshToken: { token: string },
+					idToken: { token: string }
+				}
+			}) => {
+				return new Promise<any>((resolve, reject) =>
+					// https://github.com/auth0/node-jsonwebtoken
+					jwt.sign(
+						{
+							// TODO: payload is only for react frontend demo
+							// this can be removed once that is no longer useful
+							payload: {
+								id: options.user.id,
+								publicAddress,
+							},
+							publicAddress,
+							username: options.user.username || publicAddress,
+							"https://hasura.io/jwt/claims": {
+								"x-hasura-user-id": publicAddress,
+								"x-hasura-default-role": "user"
+							},
+							typ: "Access",
+						},
+						config.secret,
+						{
+							algorithm: config.algorithms[0],
+							expiresIn: '5m',
+							audience: config.publicURI,
+							issuer: config.publicURI,
+							jwtid: uuid(),
+							subject: publicAddress
+						},
+						(err, accessToken) => {
+							if (err) {
+								return reject(err);
+							}
+							if (!accessToken) {
+								return new Error('Empty token');
+							}
+							const newTokens = {
+								...options.tokens,
+								accessToken: {
+									token: accessToken
+								}
+							}
+							return resolve(newTokens);
+						}
+					)
+				);
+			})
+			.then((tokens: {
+				idToken: { token: string, expiry: number }
+				accessToken: { token: string, expiry: number },
+				refreshToken: { token: string, expiry: number }
+			}) =>
+				res
+					.json({ ...tokens }))
 			.catch(next)
 	);
 };
