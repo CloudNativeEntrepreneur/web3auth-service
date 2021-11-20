@@ -89,6 +89,10 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 								id: user.id,
 								publicAddress,
 							},
+							"https://hasura.io/jwt/claims": {
+								"x-hasura-user-id": publicAddress,
+								"x-hasura-default-role": "user"
+							}
 						},
 						config.secret,
 						{
