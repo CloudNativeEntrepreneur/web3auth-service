@@ -1,6 +1,7 @@
 import os from 'os';
 import path from 'path';
 import { INTEGER, Sequelize, STRING } from 'sequelize';
+import { v4 as uuid } from 'uuid'
 
 import { User } from './models';
 
@@ -16,7 +17,7 @@ User.init(
 		nonce: {
 			allowNull: false,
 			type: INTEGER.UNSIGNED, // SQLITE will use INTEGER
-			defaultValue: (): number => Math.floor(Math.random() * 10000), // Initialize with a random nonce
+			defaultValue: (): string => uuid(), // Initialize with a random nonce
 		},
 		publicAddress: {
 			allowNull: false,
