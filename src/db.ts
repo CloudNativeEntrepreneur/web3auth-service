@@ -1,9 +1,9 @@
 import os from 'os';
 import path from 'path';
-import { INTEGER, Sequelize, STRING } from 'sequelize';
+import { BOOLEAN, INTEGER, Sequelize, STRING } from 'sequelize';
 import { v4 as uuid } from 'uuid'
 
-import { User } from './models';
+import { User, RefreshToken } from './models';
 
 const sequelize = new Sequelize('login-with-metamask-database', '', undefined, {
 	dialect: 'sqlite',
@@ -37,6 +37,38 @@ User.init(
 		timestamps: false,
 	}
 );
+
+RefreshToken.init(
+	{
+		userPublicAddress: {
+			allowNull: false,
+			type: STRING,
+			primaryKey: true
+		},
+		token: {
+			allowNull: false,
+			type: STRING,
+			primaryKey: true
+		},
+		revoked: {
+			allowNull: false,
+			type: BOOLEAN,
+			defaultValue: () : boolean => false
+		}
+	},
+	{
+		modelName: 'refreshToken',
+		sequelize,
+		timestamps: false
+	}
+)
+
+User.hasMany(RefreshToken, {
+	foreignKey: 'userPublicAddress'
+})
+RefreshToken.belongsTo(User, {
+	foreignKey: 'publicAddress'
+})
 
 // Create new tables
 sequelize.sync();
