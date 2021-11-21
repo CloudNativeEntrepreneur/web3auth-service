@@ -171,12 +171,6 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 					// https://github.com/auth0/node-jsonwebtoken
 					jwt.sign(
 						{
-							// TODO: payload is only for react frontend demo
-							// this can be removed once that is no longer useful
-							payload: {
-								id: options.user.id,
-								publicAddress,
-							},
 							publicAddress,
 							username: options.user.username || publicAddress,
 							"https://hasura.io/jwt/claims": {
