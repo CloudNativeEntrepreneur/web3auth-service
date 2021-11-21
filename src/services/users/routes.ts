@@ -11,11 +11,11 @@ userRouter.route('/').get(controller.find);
 
 /** GET /api/users/:publicAddress */
 /** Authenticated route */
-userRouter.route('/:publicAddress').get(jwt(config), controller.get);
+userRouter.route('/:publicAddress').get(jwt(config.jwt), controller.get);
 
 /** POST /api/users */
 userRouter.route('/').post(controller.create);
 
 /** PATCH /api/users/:publicAddress */
 /** Authenticated route */
-userRouter.route('/:publicAddress').patch(jwt(config), controller.patch);
+userRouter.route('/:publicAddress').patch(jwt(config.jwt), controller.patch);

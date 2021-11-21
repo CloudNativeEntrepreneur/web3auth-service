@@ -75,7 +75,7 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 					);
 				}
 
-				user.nonce = Math.floor(Math.random() * 10000);
+				user.nonce = uuid();
 				return user.save();
 			})
 			////////////////////////////////////////////////////
@@ -92,9 +92,9 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 						{
 							typ: "Refresh",
 						},
-						config.secret,
+						config.jwt.secret,
 						{
-							algorithm: config.algorithms[0],
+							algorithm: config.jwt.algorithms[0],
 							expiresIn: '2d',
 							audience: config.publicURI,
 							issuer: config.publicURI,
@@ -130,9 +130,9 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							username: options.user.username || publicAddress,
 							typ: "Id",
 						},
-						config.secret,
+						config.jwt.secret,
 						{
-							algorithm: config.algorithms[0],
+							algorithm: config.jwt.algorithms[0],
 							expiresIn: '2d',
 							audience: config.publicURI,
 							issuer: config.publicURI,
@@ -179,9 +179,9 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							},
 							typ: "Access",
 						},
-						config.secret,
+						config.jwt.secret,
 						{
-							algorithm: config.algorithms[0],
+							algorithm: config.jwt.algorithms[0],
 							expiresIn: '5m',
 							audience: config.publicURI,
 							issuer: config.publicURI,
