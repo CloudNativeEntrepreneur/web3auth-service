@@ -6,6 +6,7 @@ import { v4 as uuid } from 'uuid'
 
 import { config } from '../../config';
 import { User } from '../../models/user.model';
+import { RefreshToken } from '../../models/refreshToken.model';
 
 export const create = (req: Request, res: Response, next: NextFunction) => {
 	const { signature, publicAddress } = req.body;
@@ -83,7 +84,7 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 			////////////////////////////////////////////////////
 			// ---
 			////////////////////////////////////////////////////
-			// Step 4a: Create Refresh Token JWT
+			// Step 4a-1: Create Refresh Token JWT
 			////////////////////////////////////////////////////
 			.then((user: User) => {
 				return new Promise<any>((resolve, reject) =>
@@ -115,6 +116,22 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 						}
 					)
 				);
+			})
+			////////////////////////////////////////////////////
+			// Step 4a-2: Store Refresh Token
+			////////////////////////////////////////////////////
+			.then((options: { 
+				user: User, 
+				tokens: { refreshToken: string }
+			}) => {
+				return new Promise<any>(async (resolve, reject) => {
+					await RefreshToken.create({
+						userPublicAddress: options.user.publicAddress,
+						token: options.tokens.refreshToken
+					})
+
+					return resolve(options)
+				})
 			})
 			////////////////////////////////////////////////////
 			// Step 4b: Create Id Token JWT
