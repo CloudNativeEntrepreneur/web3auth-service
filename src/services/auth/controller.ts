@@ -101,17 +101,15 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							jwtid: uuid(),
 							subject: publicAddress
 						},
-						(err, token) => {
+						(err, refreshToken) => {
 							if (err) {
 								return reject(err);
 							}
-							if (!token) {
+							if (!refreshToken) {
 								return new Error('Empty token');
 							}
 							const tokens = {
-								refreshToken: {
-									token
-								}
+								refreshToken
 							}
 							return resolve({ user, tokens });
 						}
@@ -121,7 +119,10 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 			////////////////////////////////////////////////////
 			// Step 4b: Create Id Token JWT
 			////////////////////////////////////////////////////
-			.then((options: { user: User, tokens: { refreshToken: { token: string } } }) => {
+			.then((options: { 
+					user: User, 
+					tokens: { refreshToken: string }
+				}) => {
 				return new Promise<any>((resolve, reject) =>
 					// https://github.com/auth0/node-jsonwebtoken
 					jwt.sign(
@@ -148,9 +149,7 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							}
 							const newTokens = {
 								...options.tokens,
-								idToken: {
-									token: idToken
-								}
+								idToken
 							}
 							return resolve({ user: options.user, tokens: newTokens });
 						}
@@ -163,8 +162,8 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 			.then((options: {
 				user: User,
 				tokens: {
-					refreshToken: { token: string },
-					idToken: { token: string }
+					idToken: string,
+					refreshToken: string,
 				}
 			}) => {
 				return new Promise<any>((resolve, reject) =>
@@ -197,9 +196,7 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							}
 							const newTokens = {
 								...options.tokens,
-								accessToken: {
-									token: accessToken
-								}
+								accessToken
 							}
 							return resolve(newTokens);
 						}
@@ -207,9 +204,9 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 				);
 			})
 			.then((tokens: {
-				idToken: { token: string, expiry: number }
-				accessToken: { token: string, expiry: number },
-				refreshToken: { token: string, expiry: number }
+				accessToken: string,
+				idToken: string,
+				refreshToken: string
 			}) =>
 				res
 					.json({ ...tokens }))
