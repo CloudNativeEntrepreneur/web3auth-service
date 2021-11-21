@@ -9,13 +9,13 @@ export const userRouter = express.Router();
 /** GET /api/users */
 userRouter.route('/').get(controller.find);
 
-/** GET /api/users/:userId */
+/** GET /api/users/:publicAddress */
 /** Authenticated route */
-userRouter.route('/:userId').get(jwt(config), controller.get);
+userRouter.route('/:publicAddress').get(jwt(config), controller.get);
 
 /** POST /api/users */
 userRouter.route('/').post(controller.create);
 
-/** PATCH /api/users/:userId */
+/** PATCH /api/users/:publicAddress */
 /** Authenticated route */
-userRouter.route('/:userId').patch(jwt(config), controller.patch);
+userRouter.route('/:publicAddress').patch(jwt(config), controller.patch);

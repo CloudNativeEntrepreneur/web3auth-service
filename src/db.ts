@@ -22,6 +22,7 @@ User.init(
 			allowNull: false,
 			type: STRING,
 			unique: true,
+			primaryKey: true,
 			validate: { isLowercase: true },
 		},
 		username: {
