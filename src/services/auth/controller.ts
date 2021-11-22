@@ -2,11 +2,13 @@ import { recoverPersonalSignature } from 'eth-sig-util';
 import { bufferToHex } from 'ethereumjs-util';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid'
-
+import { v4 as uuid } from 'uuid';
 import { config } from '../../config';
 import { User } from '../../models/user.model';
 import { RefreshToken } from '../../models/refreshToken.model';
+import debug from 'debug'
+
+const log = debug('web3auth')
 
 export const create = (req: Request, res: Response, next: NextFunction) => {
 	const { signature, publicAddress } = req.body;
@@ -16,7 +18,7 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 			.send({ error: 'Request should have signature and publicAddress' });
 
 	return (
-		User.findOne({ where: { publicAddress } })
+		User.findByPk(publicAddress)
 			////////////////////////////////////////////////////
 			// Step 1: Get the user with the given publicAddress
 			////////////////////////////////////////////////////
@@ -99,7 +101,6 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							expiresIn: '2d',
 							audience: config.publicURI,
 							issuer: config.publicURI,
-							jwtid: uuid(),
 							subject: publicAddress
 						},
 						(err, refreshToken) => {
@@ -154,7 +155,6 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							expiresIn: '2d',
 							audience: config.publicURI,
 							issuer: config.publicURI,
-							jwtid: uuid(),
 							subject: publicAddress
 						},
 						(err, idToken) => {
@@ -201,7 +201,6 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 							expiresIn: '5m',
 							audience: config.publicURI,
 							issuer: config.publicURI,
-							jwtid: uuid(),
 							subject: publicAddress
 						},
 						(err, accessToken) => {
@@ -229,4 +228,102 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
 					.json({ ...tokens }))
 			.catch(next)
 	);
+};
+
+export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+	const { refreshToken } = req.body;
+
+	if (!refreshToken)
+		return res
+			.status(400)
+			.send({ error: 'Request should have refreshToken' });
+
+	let decodedJWT
+	try {
+		decodedJWT = jwt.verify(refreshToken, config.jwt.secret)
+	} catch (err) {
+		return res.status(401).send({
+			error: `RefreshToken Signature could not be verified`,
+		});
+	}
+
+	let sub: string | undefined = decodedJWT.sub as string
+	let publicAddress = sub
+
+	log('refreshing token for', sub)
+
+	const token = await RefreshToken.findByPk(refreshToken)
+
+	if (!token) {
+		return res.status(401).send({
+			error: `RefreshToken is not found in database`,
+		});
+	}
+
+	if (token.revoked) {
+		return res.status(401).send({
+			error: `RefreshToken has been revoked`,
+		});
+	}
+
+	const user = await User.findByPk(publicAddress)
+
+	const newRefreshToken = await jwt.sign(
+		{ typ: "Refresh" }, 
+		config.jwt.secret,
+		{
+			algorithm: config.jwt.algorithms[0],
+			expiresIn: '2d',
+			audience: config.publicURI,
+			issuer: config.publicURI,
+			subject: publicAddress
+		}
+	)
+
+	await RefreshToken.create({
+		userPublicAddress: publicAddress,
+		token: newRefreshToken
+	})
+
+	const idToken = await jwt.sign(
+		{
+			publicAddress,
+			username: user?.username || publicAddress,
+			typ: "Id",
+		},
+		config.jwt.secret,
+		{
+			algorithm: config.jwt.algorithms[0],
+			expiresIn: '2d',
+			audience: config.publicURI,
+			issuer: config.publicURI,
+			subject: publicAddress
+		}
+	)
+
+	const accessToken = await jwt.sign(
+		{
+			publicAddress,
+			username: user?.username || publicAddress,
+			"https://hasura.io/jwt/claims": {
+				"x-hasura-user-id": publicAddress,
+				"x-hasura-default-role": "user"
+			},
+			typ: "Access",
+		},
+		config.jwt.secret,
+		{
+			algorithm: config.jwt.algorithms[0],
+			expiresIn: '5m',
+			audience: config.publicURI,
+			issuer: config.publicURI,
+			subject: publicAddress
+		}
+	)
+
+	return res.send({
+		accessToken,
+		refreshToken: newRefreshToken,
+		idToken
+	})
 };

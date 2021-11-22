@@ -43,7 +43,6 @@ RefreshToken.init(
 		userPublicAddress: {
 			allowNull: false,
 			type: STRING,
-			primaryKey: true
 		},
 		token: {
 			allowNull: false,
