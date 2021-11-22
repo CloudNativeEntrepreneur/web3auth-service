@@ -10,6 +10,73 @@ import debug from "debug";
 
 const log = debug("web3auth");
 
+const generateJWTs = async (user: User) => {
+  // Step 1a Create Refresh Token JWT
+  const refreshToken = await jwt.sign(
+    {
+      typ: "Refresh",
+    },
+    config.jwt.secret,
+    {
+      algorithm: config.jwt.algorithms[0],
+      expiresIn: "2d",
+      audience: config.publicURI,
+      issuer: config.publicURI,
+      subject: user.publicAddress,
+    }
+  );
+
+  // Step 1b: Store Refresh Token
+  await RefreshToken.create({
+    userPublicAddress: user.publicAddress,
+    token: refreshToken,
+  });
+
+  // Step 2: Create Id Token JWT
+  const idToken = await jwt.sign(
+    {
+      publicAddress: user.publicAddress,
+      username: user.username || user.publicAddress,
+      typ: "Id",
+    },
+    config.jwt.secret,
+    {
+      algorithm: config.jwt.algorithms[0],
+      expiresIn: "2d",
+      audience: config.publicURI,
+      issuer: config.publicURI,
+      subject: user.publicAddress,
+    }
+  );
+
+  // Step 3: Create Access Token JWT
+  const accessToken = await jwt.sign(
+    {
+      publicAddress: user.publicAddress,
+      username: user.username || user.publicAddress,
+      "https://hasura.io/jwt/claims": {
+        "x-hasura-user-id": user.publicAddress,
+        "x-hasura-default-role": "user",
+      },
+      typ: "Access",
+    },
+    config.jwt.secret,
+    {
+      algorithm: config.jwt.algorithms[0],
+      expiresIn: "5m",
+      audience: config.publicURI,
+      issuer: config.publicURI,
+      subject: user.publicAddress,
+    }
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    idToken,
+  };
+};
+
 export const create = async (
   req: Request,
   res: Response,
@@ -51,71 +118,8 @@ export const create = async (
     user.nonce = uuid();
     await user.save();
 
-    // Step 4: Create JWTs
-    // Step 4a-1: Create Refresh Token JWT
-    const refreshToken = await jwt.sign(
-      {
-        typ: "Refresh",
-      },
-      config.jwt.secret,
-      {
-        algorithm: config.jwt.algorithms[0],
-        expiresIn: "2d",
-        audience: config.publicURI,
-        issuer: config.publicURI,
-        subject: publicAddress,
-      }
-    );
+    const tokens = await generateJWTs(user);
 
-    // Step 4a-2: Store Refresh Token
-    await RefreshToken.create({
-      userPublicAddress: publicAddress,
-      token: refreshToken,
-    });
-
-    // Step 4b: Create Id Token JWT
-    const idToken = await jwt.sign(
-      {
-        publicAddress,
-        username: user.username || publicAddress,
-        typ: "Id",
-      },
-      config.jwt.secret,
-      {
-        algorithm: config.jwt.algorithms[0],
-        expiresIn: "2d",
-        audience: config.publicURI,
-        issuer: config.publicURI,
-        subject: publicAddress,
-      }
-    );
-
-    // Step 4c: Create Access Token JWT
-    const accessToken = await jwt.sign(
-      {
-        publicAddress,
-        username: user.username || publicAddress,
-        "https://hasura.io/jwt/claims": {
-          "x-hasura-user-id": publicAddress,
-          "x-hasura-default-role": "user",
-        },
-        typ: "Access",
-      },
-      config.jwt.secret,
-      {
-        algorithm: config.jwt.algorithms[0],
-        expiresIn: "5m",
-        audience: config.publicURI,
-        issuer: config.publicURI,
-        subject: publicAddress,
-      }
-    );
-
-    const tokens = {
-      accessToken,
-      refreshToken,
-      idToken,
-    };
     return res.json({ ...tokens });
   } catch (err) {
     console.error(err);
@@ -164,66 +168,16 @@ export const refreshToken = async (
       });
     }
 
-    const user = await User.findByPk(publicAddress);
+    const user: User | null = await User.findByPk(publicAddress);
 
-    const newRefreshToken = await jwt.sign(
-      { typ: "Refresh" },
-      config.jwt.secret,
-      {
-        algorithm: config.jwt.algorithms[0],
-        expiresIn: "2d",
-        audience: config.publicURI,
-        issuer: config.publicURI,
-        subject: publicAddress,
-      }
-    );
+    if (!user)
+      return res.status(401).send({
+        error: `User with publicAddress ${publicAddress} is not found in database`,
+      });
 
-    await RefreshToken.create({
-      userPublicAddress: publicAddress,
-      token: newRefreshToken,
-    });
+    const tokens = await generateJWTs(user);
 
-    const idToken = await jwt.sign(
-      {
-        publicAddress,
-        username: user?.username || publicAddress,
-        typ: "Id",
-      },
-      config.jwt.secret,
-      {
-        algorithm: config.jwt.algorithms[0],
-        expiresIn: "2d",
-        audience: config.publicURI,
-        issuer: config.publicURI,
-        subject: publicAddress,
-      }
-    );
-
-    const accessToken = await jwt.sign(
-      {
-        publicAddress,
-        username: user?.username || publicAddress,
-        "https://hasura.io/jwt/claims": {
-          "x-hasura-user-id": publicAddress,
-          "x-hasura-default-role": "user",
-        },
-        typ: "Access",
-      },
-      config.jwt.secret,
-      {
-        algorithm: config.jwt.algorithms[0],
-        expiresIn: "5m",
-        audience: config.publicURI,
-        issuer: config.publicURI,
-        subject: publicAddress,
-      }
-    );
-
-    return res.send({
-      accessToken,
-      refreshToken: newRefreshToken,
-      idToken,
-    });
+    return res.json({ ...tokens });
   } catch (err) {
     console.error(err);
     return next(err);
