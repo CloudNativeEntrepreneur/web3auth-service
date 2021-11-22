@@ -6,7 +6,6 @@
       "type": "node",
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
       "program": "${workspaceFolder}/src/index.ts",
-      "url": "https://localhost:5003",
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true,
       "trace": true
