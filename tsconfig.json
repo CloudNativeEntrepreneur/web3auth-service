@@ -5,7 +5,7 @@
     "outDir": "build",
     "module": "commonjs",
     "strict": true,
-    "target": "es6"
+    "target": "es2020"
   },
   "include": ["src/"]
 }

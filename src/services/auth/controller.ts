@@ -119,16 +119,16 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
       ////////////////////////////////////////////////////
       // Step 4a-2: Store Refresh Token
       ////////////////////////////////////////////////////
-      .then((options: { user: User; tokens: { refreshToken: string } }) => {
-        return new Promise<any>(async (resolve, reject) => {
+      .then(
+        async (options: { user: User; tokens: { refreshToken: string } }) => {
           await RefreshToken.create({
             userPublicAddress: options.user.publicAddress,
             token: options.tokens.refreshToken,
           });
 
-          return resolve(options);
-        });
-      })
+          return options;
+        }
+      )
       ////////////////////////////////////////////////////
       // Step 4b: Create Id Token JWT
       ////////////////////////////////////////////////////
@@ -229,97 +229,104 @@ export const refreshToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken)
-    return res.status(400).send({ error: "Request should have refreshToken" });
-
-  let decodedJWT;
   try {
-    decodedJWT = jwt.verify(refreshToken, config.jwt.secret);
-  } catch (err) {
-    return res.status(401).send({
-      error: `RefreshToken Signature could not be verified`,
-    });
-  }
+    const { refreshToken } = req.body;
 
-  let sub: string | undefined = decodedJWT.sub as string;
-  let publicAddress = sub;
+    if (!refreshToken)
+      return res
+        .status(400)
+        .send({ error: "Request should have refreshToken" });
 
-  log("refreshing token for", sub);
-
-  const token = await RefreshToken.findByPk(refreshToken);
-
-  if (!token) {
-    return res.status(401).send({
-      error: `RefreshToken is not found in database`,
-    });
-  }
-
-  if (token.revoked) {
-    return res.status(401).send({
-      error: `RefreshToken has been revoked`,
-    });
-  }
-
-  const user = await User.findByPk(publicAddress);
-
-  const newRefreshToken = await jwt.sign(
-    { typ: "Refresh" },
-    config.jwt.secret,
-    {
-      algorithm: config.jwt.algorithms[0],
-      expiresIn: "2d",
-      audience: config.publicURI,
-      issuer: config.publicURI,
-      subject: publicAddress,
+    let decodedJWT;
+    try {
+      decodedJWT = jwt.verify(refreshToken, config.jwt.secret);
+    } catch (err) {
+      return res.status(401).send({
+        error: `RefreshToken Signature could not be verified`,
+      });
     }
-  );
 
-  await RefreshToken.create({
-    userPublicAddress: publicAddress,
-    token: newRefreshToken,
-  });
+    const sub: string | undefined = decodedJWT.sub as string;
+    const publicAddress = sub;
 
-  const idToken = await jwt.sign(
-    {
-      publicAddress,
-      username: user?.username || publicAddress,
-      typ: "Id",
-    },
-    config.jwt.secret,
-    {
-      algorithm: config.jwt.algorithms[0],
-      expiresIn: "2d",
-      audience: config.publicURI,
-      issuer: config.publicURI,
-      subject: publicAddress,
+    log("refreshing token for", sub);
+
+    const token = await RefreshToken.findByPk(refreshToken);
+
+    if (!token) {
+      return res.status(401).send({
+        error: `RefreshToken is not found in database`,
+      });
     }
-  );
 
-  const accessToken = await jwt.sign(
-    {
-      publicAddress,
-      username: user?.username || publicAddress,
-      "https://hasura.io/jwt/claims": {
-        "x-hasura-user-id": publicAddress,
-        "x-hasura-default-role": "user",
+    if (token.revoked) {
+      return res.status(401).send({
+        error: `RefreshToken has been revoked`,
+      });
+    }
+
+    const user = await User.findByPk(publicAddress);
+
+    const newRefreshToken = await jwt.sign(
+      { typ: "Refresh" },
+      config.jwt.secret,
+      {
+        algorithm: config.jwt.algorithms[0],
+        expiresIn: "2d",
+        audience: config.publicURI,
+        issuer: config.publicURI,
+        subject: publicAddress,
+      }
+    );
+
+    await RefreshToken.create({
+      userPublicAddress: publicAddress,
+      token: newRefreshToken,
+    });
+
+    const idToken = await jwt.sign(
+      {
+        publicAddress,
+        username: user?.username || publicAddress,
+        typ: "Id",
       },
-      typ: "Access",
-    },
-    config.jwt.secret,
-    {
-      algorithm: config.jwt.algorithms[0],
-      expiresIn: "5m",
-      audience: config.publicURI,
-      issuer: config.publicURI,
-      subject: publicAddress,
-    }
-  );
+      config.jwt.secret,
+      {
+        algorithm: config.jwt.algorithms[0],
+        expiresIn: "2d",
+        audience: config.publicURI,
+        issuer: config.publicURI,
+        subject: publicAddress,
+      }
+    );
 
-  return res.send({
-    accessToken,
-    refreshToken: newRefreshToken,
-    idToken,
-  });
+    const accessToken = await jwt.sign(
+      {
+        publicAddress,
+        username: user?.username || publicAddress,
+        "https://hasura.io/jwt/claims": {
+          "x-hasura-user-id": publicAddress,
+          "x-hasura-default-role": "user",
+        },
+        typ: "Access",
+      },
+      config.jwt.secret,
+      {
+        algorithm: config.jwt.algorithms[0],
+        expiresIn: "5m",
+        audience: config.publicURI,
+        issuer: config.publicURI,
+        subject: publicAddress,
+      }
+    );
+
+    return res.send({
+      accessToken,
+      refreshToken: newRefreshToken,
+      idToken,
+    });
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
 };
