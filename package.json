@@ -45,7 +45,7 @@
     "nodemon": "2.0.15",
     "prettier": "2.4.1",
     "prettier-plugin-svelte": "2.5.0",
-    "ts-node": "9.1.1",
+    "ts-node": "10.4.0",
     "typescript": "4.5.2"
   },
   "resolutions": {
