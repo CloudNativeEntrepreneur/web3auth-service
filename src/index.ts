@@ -1,10 +1,10 @@
-import './db';
+import "./db";
 
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import express from 'express';
+import bodyParser from "body-parser";
+import cors from "cors";
+import express from "express";
 
-import { services } from './services';
+import { services } from "./services";
 
 const app = express();
 
@@ -13,14 +13,14 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Mount REST on /auth
-app.use('/auth', services);
+app.use("/auth", services);
 
 const port = process.env.PORT || 8000;
 
-app.get('/', (req, res) => {
-	res.send('ok');
-})
+app.get("/", (req, res) => {
+  res.send("ok");
+});
 
 app.listen(port, () =>
-	console.log(`Express app listening on localhost:${port}`)
+  console.log(`Express app listening on localhost:${port}`)
 );
