@@ -119,3 +119,4 @@ dist
 
 # Typescript Build
 build/
+dist/

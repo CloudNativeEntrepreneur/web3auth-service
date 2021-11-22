@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=web3auth
+      - POSTGRES_USER=web3auth
+      - POSTGRES_PASSWORD=web3auth
+    ports:
+      - 5432:5432
