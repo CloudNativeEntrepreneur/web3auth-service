@@ -10,218 +10,117 @@ import debug from "debug";
 
 const log = debug("web3auth");
 
-export const create = (req: Request, res: Response, next: NextFunction) => {
-  const { signature, publicAddress } = req.body;
-  if (!signature || !publicAddress)
-    return res
-      .status(400)
-      .send({ error: "Request should have signature and publicAddress" });
+export const create = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { signature, publicAddress } = req.body;
+    if (!signature || !publicAddress)
+      return res
+        .status(400)
+        .send({ error: "Request should have signature and publicAddress" });
 
-  return (
-    User.findByPk(publicAddress)
-      ////////////////////////////////////////////////////
-      // Step 1: Get the user with the given publicAddress
-      ////////////////////////////////////////////////////
-      .then((user: User | null) => {
-        if (!user) {
-          res.status(401).send({
-            error: `User with publicAddress ${publicAddress} is not found in database`,
-          });
+    // Step 1: Get the user with the given publicAddress
+    const user: User | null = await User.findByPk(publicAddress);
+    if (!user)
+      return res.status(401).send({
+        error: `User with publicAddress ${publicAddress} is not found in database`,
+      });
 
-          return null;
-        }
+    // Step 2: Verify digital signature
+    // We now are in possession of msg, publicAddress and signature. We
+    // will use a helper from eth-sig-util to extract the address from the signature
+    // The signature verification is successful if the address found with
+    // sigUtil.recoverPersonalSignature matches the initial publicAddress
+    const msg = `I am signing my one-time nonce: ${user.nonce}`;
+    const msgBufferHex = bufferToHex(Buffer.from(msg, "utf8"));
+    const address = recoverPersonalSignature({
+      data: msgBufferHex,
+      sig: signature,
+    });
+    const signatureAddressMatchesUserAddress =
+      address.toLowerCase() === publicAddress.toLowerCase();
+    if (!signatureAddressMatchesUserAddress)
+      return res.status(401).send({
+        error: "Signature verification failed",
+      });
 
-        return user;
-      })
-      ////////////////////////////////////////////////////
-      // Step 2: Verify digital signature
-      ////////////////////////////////////////////////////
-      .then((user: User | null) => {
-        if (!(user instanceof User)) {
-          // Should not happen, we should have already sent the response
-          throw new Error('User is not defined in "Verify digital signature".');
-        }
+    // Step 3: Generate a new nonce for the user
+    user.nonce = uuid();
+    await user.save();
 
-        const msg = `I am signing my one-time nonce: ${user.nonce}`;
+    // Step 4: Create JWTs
+    // Step 4a-1: Create Refresh Token JWT
+    const refreshToken = await jwt.sign(
+      {
+        typ: "Refresh",
+      },
+      config.jwt.secret,
+      {
+        algorithm: config.jwt.algorithms[0],
+        expiresIn: "2d",
+        audience: config.publicURI,
+        issuer: config.publicURI,
+        subject: publicAddress,
+      }
+    );
 
-        // We now are in possession of msg, publicAddress and signature. We
-        // will use a helper from eth-sig-util to extract the address from the signature
-        const msgBufferHex = bufferToHex(Buffer.from(msg, "utf8"));
-        const address = recoverPersonalSignature({
-          data: msgBufferHex,
-          sig: signature,
-        });
+    // Step 4a-2: Store Refresh Token
+    await RefreshToken.create({
+      userPublicAddress: publicAddress,
+      token: refreshToken,
+    });
 
-        // The signature verification is successful if the address found with
-        // sigUtil.recoverPersonalSignature matches the initial publicAddress
-        if (address.toLowerCase() === publicAddress.toLowerCase()) {
-          return user;
-        } else {
-          res.status(401).send({
-            error: "Signature verification failed",
-          });
+    // Step 4b: Create Id Token JWT
+    const idToken = await jwt.sign(
+      {
+        publicAddress,
+        username: user.username || publicAddress,
+        typ: "Id",
+      },
+      config.jwt.secret,
+      {
+        algorithm: config.jwt.algorithms[0],
+        expiresIn: "2d",
+        audience: config.publicURI,
+        issuer: config.publicURI,
+        subject: publicAddress,
+      }
+    );
 
-          return null;
-        }
-      })
-      ////////////////////////////////////////////////////
-      // Step 3: Generate a new nonce for the user
-      ////////////////////////////////////////////////////
-      .then((user: User | null) => {
-        if (!(user instanceof User)) {
-          // Should not happen, we should have already sent the response
+    // Step 4c: Create Access Token JWT
+    const accessToken = await jwt.sign(
+      {
+        publicAddress,
+        username: user.username || publicAddress,
+        "https://hasura.io/jwt/claims": {
+          "x-hasura-user-id": publicAddress,
+          "x-hasura-default-role": "user",
+        },
+        typ: "Access",
+      },
+      config.jwt.secret,
+      {
+        algorithm: config.jwt.algorithms[0],
+        expiresIn: "5m",
+        audience: config.publicURI,
+        issuer: config.publicURI,
+        subject: publicAddress,
+      }
+    );
 
-          throw new Error(
-            'User is not defined in "Generate a new nonce for the user".'
-          );
-        }
-
-        user.nonce = uuid();
-        return user.save();
-      })
-      ////////////////////////////////////////////////////
-      // Step 4: Create JWTs
-      ////////////////////////////////////////////////////
-      // ---
-      ////////////////////////////////////////////////////
-      // Step 4a-1: Create Refresh Token JWT
-      ////////////////////////////////////////////////////
-      .then((user: User) => {
-        return new Promise<any>((resolve, reject) =>
-          // https://github.com/auth0/node-jsonwebtoken
-          jwt.sign(
-            {
-              typ: "Refresh",
-            },
-            config.jwt.secret,
-            {
-              algorithm: config.jwt.algorithms[0],
-              expiresIn: "2d",
-              audience: config.publicURI,
-              issuer: config.publicURI,
-              subject: publicAddress,
-            },
-            (err, refreshToken) => {
-              if (err) {
-                return reject(err);
-              }
-              if (!refreshToken) {
-                return new Error("Empty token");
-              }
-              const tokens = {
-                refreshToken,
-              };
-              return resolve({ user, tokens });
-            }
-          )
-        );
-      })
-      ////////////////////////////////////////////////////
-      // Step 4a-2: Store Refresh Token
-      ////////////////////////////////////////////////////
-      .then(
-        async (options: { user: User; tokens: { refreshToken: string } }) => {
-          await RefreshToken.create({
-            userPublicAddress: options.user.publicAddress,
-            token: options.tokens.refreshToken,
-          });
-
-          return options;
-        }
-      )
-      ////////////////////////////////////////////////////
-      // Step 4b: Create Id Token JWT
-      ////////////////////////////////////////////////////
-      .then((options: { user: User; tokens: { refreshToken: string } }) => {
-        return new Promise<any>((resolve, reject) =>
-          // https://github.com/auth0/node-jsonwebtoken
-          jwt.sign(
-            {
-              publicAddress,
-              username: options.user.username || publicAddress,
-              typ: "Id",
-            },
-            config.jwt.secret,
-            {
-              algorithm: config.jwt.algorithms[0],
-              expiresIn: "2d",
-              audience: config.publicURI,
-              issuer: config.publicURI,
-              subject: publicAddress,
-            },
-            (err, idToken) => {
-              if (err) {
-                return reject(err);
-              }
-              if (!idToken) {
-                return new Error("Empty token");
-              }
-              const newTokens = {
-                ...options.tokens,
-                idToken,
-              };
-              return resolve({ user: options.user, tokens: newTokens });
-            }
-          )
-        );
-      })
-      ////////////////////////////////////////////////////
-      // Step 4c: Create Access Token JWT
-      ////////////////////////////////////////////////////
-      .then(
-        (options: {
-          user: User;
-          tokens: {
-            idToken: string;
-            refreshToken: string;
-          };
-        }) => {
-          return new Promise<any>((resolve, reject) =>
-            // https://github.com/auth0/node-jsonwebtoken
-            jwt.sign(
-              {
-                publicAddress,
-                username: options.user.username || publicAddress,
-                "https://hasura.io/jwt/claims": {
-                  "x-hasura-user-id": publicAddress,
-                  "x-hasura-default-role": "user",
-                },
-                typ: "Access",
-              },
-              config.jwt.secret,
-              {
-                algorithm: config.jwt.algorithms[0],
-                expiresIn: "5m",
-                audience: config.publicURI,
-                issuer: config.publicURI,
-                subject: publicAddress,
-              },
-              (err, accessToken) => {
-                if (err) {
-                  return reject(err);
-                }
-                if (!accessToken) {
-                  return new Error("Empty token");
-                }
-                const newTokens = {
-                  ...options.tokens,
-                  accessToken,
-                };
-                return resolve(newTokens);
-              }
-            )
-          );
-        }
-      )
-      .then(
-        (tokens: {
-          accessToken: string;
-          idToken: string;
-          refreshToken: string;
-        }) => res.json({ ...tokens })
-      )
-      .catch(next)
-  );
+    const tokens = {
+      accessToken,
+      refreshToken,
+      idToken,
+    };
+    return res.json({ ...tokens });
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
 };
 
 export const refreshToken = async (
