@@ -1,10 +1,22 @@
-/**
- * Server Config.
- */
+import os from "os";
+import path from "path";
+
 export const config = {
   jwt: {
     algorithms: ["HS256" as const],
-    secret: "696ae31d13bb40e2ae7aa604128d3ca8", // TODO Put in process.env
+    secret: process.env.CLIENT_SECRET || "replace me with random characters, like a guid, or a few, at least 32 characters", // TODO Put in process.env
   },
-  publicURI: "http://localhost:8000/",
+  publicURI: process.env.PUBLIC_URI || "http://localhost:8000/",
+  database: {
+		sqlite: {
+			name: "web3auth",
+			username: "",
+			password: undefined,
+			sequelize: {
+				dialect: "sqlite",
+				storage: path.join(os.tmpdir(), "db.sqlite"),
+				logging: false,
+			}
+		}
+  },
 };

@@ -1,15 +1,15 @@
-import os from "os";
-import path from "path";
-import { BOOLEAN, INTEGER, Sequelize, STRING } from "sequelize";
+import { BOOLEAN, INTEGER, Options, Sequelize, STRING } from "sequelize";
 import { v4 as uuid } from "uuid";
+import { config } from "./config";
 
 import { User, RefreshToken } from "./models";
 
-const sequelize = new Sequelize("login-with-metamask-database", "", undefined, {
-  dialect: "sqlite",
-  storage: path.join(os.tmpdir(), "db.sqlite"),
-  logging: false,
-});
+const sequelize = new Sequelize(
+  config.database.sqlite.name,
+  config.database.sqlite.username,
+  config.database.sqlite.password,
+	config.database.sqlite.sequelize as Options
+);
 
 // Init all models
 User.init(

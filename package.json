@@ -9,8 +9,7 @@
   "repository": "https://github.com/amaurym/login-with-metamask-demo.git",
   "scripts": {
     "build": "tsc",
-    "dev": "DEBUG=web3auth* nodemon --watch '*.ts' --exec 'yarn start'",
-    "heroku": "node ./build",
+    "dev": "dotenv -e .local.env -- nodemon --watch '*.ts' --exec 'yarn start'",
     "start": "ts-node src",
     "lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
@@ -38,6 +37,7 @@
     "@types/debug": "4.1.7",
     "@types/uuid": "8.3.3",
     "@typescript-eslint/eslint-plugin": "5.4.0",
+    "dotenv-cli": "4.1.0",
     "eslint": "8.3.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-svelte3": "3.2.1",
