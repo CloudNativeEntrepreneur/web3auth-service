@@ -1,4 +1,4 @@
-import { recoverPersonalSignature } from "eth-sig-util";
+import { recoverPersonalSignature } from "@metamask/eth-sig-util";
 import { bufferToHex } from "ethereumjs-util";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -98,14 +98,14 @@ export const create = async (
 
     // Step 2: Verify digital signature
     // We now are in possession of msg, publicAddress and signature. We
-    // will use a helper from eth-sig-util to extract the address from the signature
+    // will use a helper from @metamask/eth-sig-util to extract the address from the signature
     // The signature verification is successful if the address found with
     // sigUtil.recoverPersonalSignature matches the initial publicAddress
     const msg = `I am signing my one-time nonce: ${user.nonce}`;
-    const msgBufferHex = bufferToHex(Buffer.from(msg, "utf8"));
+    const data = bufferToHex(Buffer.from(msg, "utf8"));
     const address = recoverPersonalSignature({
-      data: msgBufferHex,
-      sig: signature,
+      data,
+      signature,
     });
     const signatureAddressMatchesUserAddress =
       address.toLowerCase() === publicAddress.toLowerCase();
