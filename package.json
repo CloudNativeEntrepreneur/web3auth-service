@@ -14,8 +14,8 @@
     "build": "tsc",
     "dev": "dotenv -e .local.env -- nodemon",
     "start": "ts-node src",
-    "lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
-    "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
+    "lint": "prettier --check --plugin-search-dir=. . && eslint .",
+    "format": "prettier --write --plugin-search-dir=. ."
   },
   "dependencies": {
     "@metamask/eth-sig-util": "4.0.0",

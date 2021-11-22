@@ -8,7 +8,7 @@ const sequelize = new Sequelize(
   config.database.sqlite.name,
   config.database.sqlite.username,
   config.database.sqlite.password,
-	config.database.sqlite.sequelize as Options
+  config.database.sqlite.sequelize as Options
 );
 
 // Init all models
