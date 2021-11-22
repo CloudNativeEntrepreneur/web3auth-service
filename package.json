@@ -1,15 +1,18 @@
 {
-  "name": "@login-with-metamask/backend",
-  "version": "2.0.0",
-  "author": "Amaury <amaurym10@protonmail.com>",
-  "description": "Demo project for 'One-click Login with Blockchain: A MetaMask Tutorial'",
+  "name": "web3-auth-service",
+  "version": "0.0.0-development",
+  "author": "Patrick Lee Scott <pat@patscott.io>",
+  "contributors": [
+    "Amaury <amaurym10@protonmail.com>"
+  ],
+  "description": "Web3 Auth Service - Issues challenges to complete by signing with metamask, and JWT tokens (access, refresh, id) upon completion for use with backend API services such as Hasura",
   "license": "MIT",
   "main": "lib",
   "private": true,
-  "repository": "https://github.com/amaurym/login-with-metamask-demo.git",
+  "repository": "https://github.com/CloudNativeEntrepreneur/web3-auth-service.git",
   "scripts": {
     "build": "tsc",
-    "dev": "dotenv -e .local.env -- nodemon --watch '*.ts' --exec 'yarn start'",
+    "dev": "dotenv -e .local.env -- nodemon",
     "start": "ts-node src",
     "lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
