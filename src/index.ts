@@ -3,7 +3,6 @@ import "./db";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-
 import { services } from "./services";
 
 const app = express();
