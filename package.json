@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "dotenv -e .local.env -- nodemon",
-    "start": "ts-node src",
+    "start": "node ./dist/index.js",
     "lint": "prettier --check --plugin-search-dir=. . && eslint .",
     "format": "prettier --write --plugin-search-dir=. ."
   },

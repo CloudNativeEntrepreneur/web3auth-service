@@ -1,13 +1,15 @@
-import { BOOLEAN, INTEGER, Options, Sequelize, STRING } from "sequelize";
+import sequelizePkg from "sequelize";
 import { v4 as uuid } from "uuid";
 import { config } from "./config.js";
 import { User, RefreshToken } from "./models/index.js";
+
+const { BOOLEAN, INTEGER, Sequelize, STRING } = sequelizePkg
 
 const sequelize = new Sequelize(
   config.database.sqlite.name,
   config.database.sqlite.username,
   config.database.sqlite.password,
-  config.database.sqlite.sequelize as Options
+  config.database.sqlite.sequelize as sequelizePkg.Options
 );
 
 // Init all models
