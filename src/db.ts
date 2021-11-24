@@ -64,10 +64,10 @@ RefreshToken.init(
 );
 
 User.hasMany(RefreshToken, {
-  foreignKey: 'publicAddress'
+  foreignKey: "publicAddress",
 });
 RefreshToken.belongsTo(User, {
-  foreignKey: 'publicAddress'
+  foreignKey: "publicAddress",
 });
 
 // Create new tables
