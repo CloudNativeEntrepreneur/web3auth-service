@@ -1,9 +1,9 @@
-import "./db";
+import "./db.js";
 
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-import { services } from "./services";
+import { services } from "./services/index.js";
 
 const app = express();
 

@@ -1,8 +1,7 @@
 import { BOOLEAN, INTEGER, Options, Sequelize, STRING } from "sequelize";
 import { v4 as uuid } from "uuid";
-import { config } from "./config";
-
-import { User, RefreshToken } from "./models";
+import { config } from "./config.js";
+import { User, RefreshToken } from "./models/index.js";
 
 const sequelize = new Sequelize(
   config.database.sqlite.name,

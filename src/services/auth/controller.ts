@@ -3,10 +3,10 @@ import { bufferToHex } from "ethereumjs-util";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
-import { config } from "../../config";
-import { User } from "../../models/user.model";
-import { RefreshToken } from "../../models/refreshToken.model";
 import debug from "debug";
+import { config } from "../../config.js";
+import { User } from "../../models/user.model.js";
+import { RefreshToken } from "../../models/refreshToken.model.js";
 
 const log = debug("web3auth");
 
