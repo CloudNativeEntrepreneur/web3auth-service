@@ -28,7 +28,7 @@ const generateJWTs = async (user: User) => {
 
   // Step 1b: Store Refresh Token
   await RefreshToken.create({
-    userPublicAddress: user.publicAddress,
+    publicAddress: user.publicAddress,
     token: refreshToken,
   });
 

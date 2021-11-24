@@ -14,15 +14,24 @@ export const config = {
   },
   publicURI: process.env.PUBLIC_URI || "http://localhost:8000/",
   database: {
-    sqlite: {
-      name: "web3auth",
-      username: "",
-      password: undefined,
+		postgres: {
+			name: "web3auth",
+      username: "web3auth",
+      password: "web3auth",
       sequelize: {
-        dialect: "sqlite",
-        storage: path.join(os.tmpdir(), "db.sqlite"),
-        logging: false,
+        dialect: "postgres",
+				logging: true
       },
-    },
+		},
+    // sqlite: {
+    //   name: "web3auth",
+    //   username: "",
+    //   password: undefined,
+    //   sequelize: {
+    //     dialect: "sqlite",
+    //     storage: path.join(os.tmpdir(), "db.sqlite"),
+    //     logging: false,
+    //   },
+    // },
   },
 };
