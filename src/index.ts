@@ -11,8 +11,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// Mount REST on /auth
-app.use("/auth", services);
+// Mount REST on /api
+app.use("/api", services);
 
 const port = process.env.PORT || 8000;
 
