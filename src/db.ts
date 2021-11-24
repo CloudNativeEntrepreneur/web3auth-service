@@ -3,13 +3,13 @@ import { v4 as uuid } from "uuid";
 import { config } from "./config.js";
 import { User, RefreshToken } from "./models/index.js";
 
-const { BOOLEAN, INTEGER, Sequelize, STRING } = sequelizePkg;
+const { BOOLEAN, UUID, Sequelize, STRING, TEXT } = sequelizePkg;
 
 const sequelize = new Sequelize(
-  config.database.sqlite.name,
-  config.database.sqlite.username,
-  config.database.sqlite.password,
-  config.database.sqlite.sequelize as sequelizePkg.Options
+  config.database.postgres.name,
+  config.database.postgres.username,
+  config.database.postgres.password,
+  config.database.postgres.sequelize as sequelizePkg.Options
 );
 
 // Init all models
@@ -17,7 +17,7 @@ User.init(
   {
     nonce: {
       allowNull: false,
-      type: INTEGER.UNSIGNED, // SQLITE will use INTEGER
+      type: UUID,
       defaultValue: (): string => uuid(), // Initialize with a random nonce
     },
     publicAddress: {
@@ -41,13 +41,13 @@ User.init(
 
 RefreshToken.init(
   {
-    userPublicAddress: {
+    publicAddress: {
       allowNull: false,
       type: STRING,
     },
     token: {
       allowNull: false,
-      type: STRING,
+      type: TEXT,
       primaryKey: true,
     },
     revoked: {
@@ -64,10 +64,10 @@ RefreshToken.init(
 );
 
 User.hasMany(RefreshToken, {
-  foreignKey: "userPublicAddress",
+  foreignKey: 'publicAddress'
 });
 RefreshToken.belongsTo(User, {
-  foreignKey: "publicAddress",
+  foreignKey: 'publicAddress'
 });
 
 // Create new tables
