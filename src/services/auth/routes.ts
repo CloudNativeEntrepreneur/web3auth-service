@@ -3,10 +3,12 @@ import express from "express";
 import basicAuth from "express-basic-auth";
 import pino from "pino";
 import pinoLoggerMiddleware from "express-pino-logger";
-import { config } from "../../config";
-import * as controller from "./controller";
+import { config } from "../../config.js";
+import * as controller from "./controller.js";
 
-const logger = pino();
+const logger = pino({
+  name: config.clientId,
+});
 const pinoLogger = pinoLoggerMiddleware({ logger });
 
 export const authRouter = express.Router();

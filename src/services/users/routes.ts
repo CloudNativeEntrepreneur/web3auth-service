@@ -1,8 +1,8 @@
 import express from "express";
 import jwt from "express-jwt";
 import basicAuth from "express-basic-auth";
-import { config } from "../../config";
-import * as controller from "./controller";
+import { config } from "../../config.js";
+import * as controller from "./controller.js";
 
 export const userRouter = express.Router();
 

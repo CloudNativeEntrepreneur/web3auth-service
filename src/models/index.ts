@@ -1,2 +1,2 @@
-export * from "./user.model";
-export * from "./refreshToken.model";
+export * from "./user.model.js";
+export * from "./refreshToken.model.js";

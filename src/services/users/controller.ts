@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-
-import { User } from "../../models/user.model";
+import { User } from "../../models/user.model.js";
 
 export const find = (req: Request, res: Response, next: NextFunction) => {
   // If a query string ?publicAddress=... is given, then filter results
