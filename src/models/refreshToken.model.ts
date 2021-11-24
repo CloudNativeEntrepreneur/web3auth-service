@@ -1,5 +1,5 @@
 import sequelizePkg from "sequelize";
-const { Model } = sequelizePkg
+const { Model } = sequelizePkg;
 
 export class RefreshToken extends Model {
   public userPublicAddress!: string;

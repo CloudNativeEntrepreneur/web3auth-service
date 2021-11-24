@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { config } from "./config.js";
 import { User, RefreshToken } from "./models/index.js";
 
-const { BOOLEAN, INTEGER, Sequelize, STRING } = sequelizePkg
+const { BOOLEAN, INTEGER, Sequelize, STRING } = sequelizePkg;
 
 const sequelize = new Sequelize(
   config.database.sqlite.name,

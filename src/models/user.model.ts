@@ -1,5 +1,5 @@
 import sequelizePkg from "sequelize";
-const { Model } = sequelizePkg
+const { Model } = sequelizePkg;
 
 export class User extends Model {
   public publicAddress!: string;
