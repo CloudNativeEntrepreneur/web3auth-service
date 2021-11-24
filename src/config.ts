@@ -14,15 +14,15 @@ export const config = {
   },
   publicURI: process.env.PUBLIC_URI || "http://localhost:8000/",
   database: {
-		postgres: {
-			name: "web3auth",
+    postgres: {
+      name: "web3auth",
       username: "web3auth",
       password: "web3auth",
       sequelize: {
         dialect: "postgres",
-				logging: true
+        logging: true,
       },
-		},
+    },
     // sqlite: {
     //   name: "web3auth",
     //   username: "",
