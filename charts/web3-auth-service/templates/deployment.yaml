@@ -3,9 +3,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: web3-auth-service
+  name: web3auth-service
   labels:
-    app: web3-auth-service
+    app: web3auth-service
     draft: {{ default "draft-app" .Values.draft }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 {{- if .Values.deploymentLabels }}
@@ -15,7 +15,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: web3-auth-service
+      app: web3auth-service
   template:
     metadata:
       labels:
@@ -30,7 +30,7 @@ spec:
 {{- end }}
     spec:
       containers:
-      - name: web3-auth-service
+      - name: web3auth-service
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: IfNotPresent
         env:

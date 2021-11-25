@@ -1,4 +1,4 @@
-# web3-auth-service
+# web3auth-service
 
 ## Running Locally
 

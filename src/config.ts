@@ -1,4 +1,4 @@
-const clientId = process.env.CLIENT_ID || "web3-auth-client";
+const clientId = process.env.CLIENT_ID || "web3auth-client";
 const clientSecret =
   process.env.CLIENT_SECRET ||
   "replace me with random characters, like a guid, or a few, at least 32 characters";

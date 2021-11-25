@@ -59,7 +59,7 @@ canary:
   gatewayLabels: {}
 
 service:
-  name: web3-auth-service
+  name: web3auth-service
   type: ClusterIP
   internalPort: 5002
   externalPort: 80

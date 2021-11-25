@@ -1,5 +1,5 @@
 {
-  "name": "web3-auth-service",
+  "name": "web3auth-service",
   "version": "0.0.0-development",
   "type": "module",
   "author": "Patrick Lee Scott <pat@patscott.io>",
@@ -10,7 +10,7 @@
   "license": "MIT",
   "main": "lib",
   "private": true,
-  "repository": "https://github.com/CloudNativeEntrepreneur/web3-auth-service.git",
+  "repository": "https://github.com/CloudNativeEntrepreneur/web3auth-service.git",
   "scripts": {
     "build": "tsc",
     "dev": "dotenv -e .local.env -- nodemon",
