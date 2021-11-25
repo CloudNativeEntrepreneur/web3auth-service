@@ -28,3 +28,10 @@ authRouter.route("/token").post(
   }),
   controller.refreshToken
 );
+
+authRouter.route("/logout").post(
+  basicAuth({
+    users: { [config.clientId]: config.jwt.secret },
+  }),
+  controller.logout
+);

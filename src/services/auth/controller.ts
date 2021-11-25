@@ -132,6 +132,38 @@ export const create = async (
   }
 };
 
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { publicAddress } = req.body;
+    if (!publicAddress)
+      return res
+        .status(400)
+        .send({ error: "Request should have publicAddress" });
+
+    const refreshTokens = await RefreshToken.findAll({
+      where: {
+        publicAddress,
+        revoked: false,
+      },
+    });
+
+    refreshTokens.forEach(async (unrevokedToken) => {
+      log("Logout revoking token", unrevokedToken.id);
+      unrevokedToken.revoked = true;
+      await unrevokedToken.save();
+    });
+
+    return res.json({});
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
+};
+
 export const refreshToken = async (
   req: Request,
   res: Response,

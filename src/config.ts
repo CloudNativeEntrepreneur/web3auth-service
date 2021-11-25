@@ -1,6 +1,3 @@
-import os from "os";
-import path from "path";
-
 const clientId = process.env.CLIENT_ID || "web3-auth-client";
 const clientSecret =
   process.env.CLIENT_SECRET ||
