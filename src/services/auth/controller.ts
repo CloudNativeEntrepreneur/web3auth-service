@@ -179,6 +179,12 @@ export const refreshToken = async (
 
     const tokens = await generateJWTs(user);
 
+    setTimeout(() => {
+      log("revoking redeemed token");
+      token.revoked = true;
+      token.save();
+    }, 30 * 1000);
+
     return res.json({ ...tokens });
   } catch (err) {
     console.error(err);
