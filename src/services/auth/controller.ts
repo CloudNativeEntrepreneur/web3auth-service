@@ -57,6 +57,7 @@ const generateJWTs = async (user: User) => {
       "https://hasura.io/jwt/claims": {
         "x-hasura-user-id": user.publicAddress,
         "x-hasura-default-role": "user",
+        "x-hasura-allowed-roles": ["user"],
       },
       typ: "Access",
     },
