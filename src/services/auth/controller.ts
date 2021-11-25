@@ -37,6 +37,7 @@ const generateJWTs = async (user: User) => {
     {
       publicAddress: user.publicAddress,
       username: user.username || user.publicAddress,
+      roles: ["user"],
       typ: "Id",
     },
     config.jwt.secret,
