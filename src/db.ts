@@ -41,6 +41,11 @@ User.init(
 
 RefreshToken.init(
   {
+    id: {
+      allowNull: false,
+      type: UUID,
+      primaryKey: true,
+    },
     publicAddress: {
       allowNull: false,
       type: STRING,
@@ -48,7 +53,6 @@ RefreshToken.init(
     token: {
       allowNull: false,
       type: TEXT,
-      primaryKey: true,
     },
     revoked: {
       allowNull: false,

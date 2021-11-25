@@ -12,6 +12,7 @@ const log = debug("web3auth");
 
 const generateJWTs = async (user: User) => {
   // Step 1a Create Refresh Token JWT
+  const jwtid = uuid();
   const refreshToken = await jwt.sign(
     {
       typ: "Refresh",
@@ -23,11 +24,13 @@ const generateJWTs = async (user: User) => {
       audience: config.publicURI,
       issuer: config.publicURI,
       subject: user.publicAddress,
+      jwtid,
     }
   );
 
   // Step 1b: Store Refresh Token
   await RefreshToken.create({
+    id: jwtid,
     publicAddress: user.publicAddress,
     token: refreshToken,
   });
@@ -152,21 +155,28 @@ export const refreshToken = async (
     }
 
     const sub: string | undefined = decodedJWT.sub as string;
+    const jwtid: string | undefined = (decodedJWT as any).jti as string;
     const publicAddress = sub;
 
-    log("refreshing token for", sub);
+    log("refreshing token for", sub, jwtid);
 
-    const token = await RefreshToken.findByPk(refreshToken);
+    const originalToken = await RefreshToken.findByPk(jwtid);
 
-    if (!token) {
+    if (!originalToken) {
       return res.status(401).send({
         error: `RefreshToken is not found in database`,
       });
     }
 
-    if (token.revoked) {
+    if (originalToken.revoked) {
       return res.status(401).send({
         error: `RefreshToken has been revoked`,
+      });
+    }
+
+    if (originalToken.token !== refreshToken) {
+      return res.status(401).send({
+        error: `RefreshToken doesn't match`,
       });
     }
 
@@ -177,15 +187,15 @@ export const refreshToken = async (
         error: `User with publicAddress ${publicAddress} is not found in database`,
       });
 
-    const tokens = await generateJWTs(user);
+    const newTokenSet = await generateJWTs(user);
 
     setTimeout(() => {
-      log("revoking redeemed token");
-      token.revoked = true;
-      token.save();
+      log("revoking redeemed token", originalToken.id);
+      originalToken.revoked = true;
+      originalToken.save();
     }, 30 * 1000);
 
-    return res.json({ ...tokens });
+    return res.json({ ...newTokenSet });
   } catch (err) {
     console.error(err);
     return next(err);
