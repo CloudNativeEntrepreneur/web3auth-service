@@ -3,3 +3,11 @@ up:
 
 down:
 	docker-compose down --remove-orphans
+
+install:
+	npm ci
+
+dev:
+	npm run dev
+
+onboard: up install dev
