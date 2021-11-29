@@ -11,10 +11,11 @@ export const config = {
   },
   publicURI: process.env.PUBLIC_URI || "http://localhost:8000/",
   database: {
+    sync: process.env.DATABASE_SYNC || false,
     postgres: {
       name: "web3auth",
       username: "web3auth",
-      password: "web3auth",
+      password: process.env.PG_PASS || "web3auth",
       sequelize: {
         dialect: "postgres",
         logging: true,

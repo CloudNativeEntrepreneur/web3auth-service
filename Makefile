@@ -10,4 +10,4 @@ install:
 dev:
 	npm run dev
 
-onboard: up install dev
+onboard: install dev

@@ -74,7 +74,9 @@ RefreshToken.belongsTo(User, {
   foreignKey: "publicAddress",
 });
 
-// Create new tables
-sequelize.sync();
+if (config.database.sync) {
+  // Create new tables
+  sequelize.sync();
+}
 
 export { sequelize };
