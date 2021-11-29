@@ -46,4 +46,14 @@ Don't use these proconfigured values in production. I typically use ExternalSecr
 
 This project is early on - it's basically a single client to provide auth, compared to something like Keycloak that has multiple clients within multiple realms. That said, the single client is good to go and that's good enough for many projects.
 
-When it's more fully featured, such as the ability to configure custom claims mappers for tokens, it could probably be consumed as a generic helm chart - but for now, I suggest using this repo as a template and importing it into your own architecture so you can change the claims mapped in the code.
+When it's more fully featured, such as the ability to configure custom claims mappers for tokens, it could probably be consumed as a generic helm chart - but for now, I suggest using this repo as a template and importing it into your own architecture so you can change the claims mapped in the code, and be able to get updates to the code.
+
+Using the template function through github would make getting updates hard, so instead, fork this repo, and clone down your fork. Then add this repo as a "remote" so you can pull updates from it like:
+
+```
+git remote add source git@github.com:CloudNativeEntrepreneur/web3auth-service.git
+git fetch --all
+git rebase source/master --autostash
+```
+
+Feel free to make PRs back with generic improvements!
