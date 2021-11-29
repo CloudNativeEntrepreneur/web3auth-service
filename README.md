@@ -38,7 +38,7 @@ npm run dev
 
 Yes, I know.
 
-It'll only work in the local development cluster - this is part of an example that contains several moving parts, so I just generated some random secrets where they were needed and preconfigured things accordingly so you can just run it locally and everything will work. Couldn't go without secrets as part of that example is an authentication server and it's JWT integration with Hasura.
+It'll only work in the local development cluster - this is part of [an example](https://github.com/CloudNativeEntrepreneur/web3auth-meta) that contains several moving parts, so I just generated some random secrets where they were needed and preconfigured things accordingly so you can just run it locally and everything will work. Couldn't go without secrets as part of that example is an authentication server and it's JWT integration with Hasura.
 
 Don't use these proconfigured values in production. I typically use ExternalSecrets in prod.
 
