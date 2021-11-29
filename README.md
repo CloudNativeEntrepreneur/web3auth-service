@@ -41,3 +41,9 @@ Yes, I know.
 It'll only work in the local development cluster - this is part of an example that contains several moving parts, so I just generated some random secrets where they were needed and preconfigured things accordingly so you can just run it locally and everything will work. Couldn't go without secrets as part of that example is an authentication server and it's JWT integration with Hasura.
 
 Don't use these proconfigured values in production. I typically use ExternalSecrets in prod.
+
+## How to use this project in production?
+
+This project is early on - it's basically a single client to provide auth, compared to something like Keycloak that has multiple clients within multiple realms. That said, the single client is good to go and that's good enough for many projects.
+
+When it's more fully featured, such as the ability to configure custom claims mappers for tokens, it could probably be consumed as a generic helm chart - but for now, I suggest using this repo as a template and importing it into your own architecture so you can change the claims mapped in the code.
