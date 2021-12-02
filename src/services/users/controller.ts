@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../../models/user.model.js";
-import { v4 as uuid } from "uuid";
 
 export const find = (req: Request, res: Response, next: NextFunction) => {
   // If a query string ?address=... is given, then filter results
