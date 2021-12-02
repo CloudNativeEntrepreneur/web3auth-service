@@ -34,6 +34,8 @@ make dev-docker-compose
 
 #### Against web3auth-db running in local-dev-cluster
 
+https://github.com/CloudNativeEntrepreneur/web3auth-db
+
 ```
 make dev
 ```
