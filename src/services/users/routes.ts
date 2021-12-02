@@ -14,9 +14,9 @@ userRouter.route("/").get(
   controller.find
 );
 
-/** GET /api/users/:publicAddress */
+/** GET /api/users/:address */
 /** Authenticated route */
-userRouter.route("/:publicAddress").get(jwt(config.jwt), controller.get);
+userRouter.route("/:address").get(jwt(config.jwt), controller.get);
 
 /** POST /api/users */
 userRouter.route("/").post(
@@ -26,6 +26,6 @@ userRouter.route("/").post(
   controller.create
 );
 
-/** PATCH /api/users/:publicAddress */
+/** PATCH /api/users/:address */
 /** Authenticated route */
-userRouter.route("/:publicAddress").patch(jwt(config.jwt), controller.patch);
+userRouter.route("/:address").patch(jwt(config.jwt), controller.patch);

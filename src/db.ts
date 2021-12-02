@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { config } from "./config.js";
 import { User, RefreshToken } from "./models/index.js";
 
-const { BOOLEAN, UUID, Sequelize, STRING, TEXT } = sequelizePkg;
+const { BOOLEAN, UUID, Sequelize, TEXT } = sequelizePkg;
 
 const sequelize = new Sequelize(
   config.database.postgres.name,
@@ -20,19 +20,20 @@ User.init(
       type: UUID,
       defaultValue: (): string => uuid(), // Initialize with a random nonce
     },
-    publicAddress: {
+    address: {
       allowNull: false,
-      type: STRING,
+      type: TEXT,
       unique: true,
       primaryKey: true,
       validate: { isLowercase: true },
     },
     username: {
-      type: STRING,
+      type: TEXT,
       unique: true,
     },
   },
   {
+    tableName: "users",
     modelName: "user",
     sequelize, // This bit is important
     timestamps: false,
@@ -46,9 +47,9 @@ RefreshToken.init(
       type: UUID,
       primaryKey: true,
     },
-    publicAddress: {
+    address: {
       allowNull: false,
-      type: STRING,
+      type: TEXT,
     },
     token: {
       allowNull: false,
@@ -61,6 +62,7 @@ RefreshToken.init(
     },
   },
   {
+    tableName: "refresh_tokens",
     modelName: "refreshToken",
     sequelize,
     timestamps: false,
@@ -68,10 +70,10 @@ RefreshToken.init(
 );
 
 User.hasMany(RefreshToken, {
-  foreignKey: "publicAddress",
+  foreignKey: "address",
 });
 RefreshToken.belongsTo(User, {
-  foreignKey: "publicAddress",
+  foreignKey: "address",
 });
 
 if (config.database.sync) {

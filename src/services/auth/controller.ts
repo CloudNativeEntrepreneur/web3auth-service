@@ -23,7 +23,7 @@ const generateJWTs = async (user: User) => {
       expiresIn: "2d",
       audience: config.publicURI,
       issuer: config.publicURI,
-      subject: user.publicAddress,
+      subject: user.address,
       jwtid,
     }
   );
@@ -31,15 +31,15 @@ const generateJWTs = async (user: User) => {
   // Step 1b: Store Refresh Token
   await RefreshToken.create({
     id: jwtid,
-    publicAddress: user.publicAddress,
+    address: user.address,
     token: refreshToken,
   });
 
   // Step 2: Create Id Token JWT
   const idToken = await jwt.sign(
     {
-      publicAddress: user.publicAddress,
-      username: user.username || user.publicAddress,
+      address: user.address,
+      username: user.username || user.address,
       roles: ["user"],
       typ: "Id",
     },
@@ -49,17 +49,17 @@ const generateJWTs = async (user: User) => {
       expiresIn: "2d",
       audience: config.publicURI,
       issuer: config.publicURI,
-      subject: user.publicAddress,
+      subject: user.address,
     }
   );
 
   // Step 3: Create Access Token JWT
   const accessToken = await jwt.sign(
     {
-      publicAddress: user.publicAddress,
-      username: user.username || user.publicAddress,
+      address: user.address,
+      username: user.username || user.address,
       "https://hasura.io/jwt/claims": {
-        "x-hasura-user-id": user.publicAddress,
+        "x-hasura-user-id": user.address,
         "x-hasura-default-role": "user",
         "x-hasura-allowed-roles": ["user"],
       },
@@ -71,7 +71,7 @@ const generateJWTs = async (user: User) => {
       expiresIn: "5m",
       audience: config.publicURI,
       issuer: config.publicURI,
-      subject: user.publicAddress,
+      subject: user.address,
     }
   );
 
@@ -88,32 +88,32 @@ export const create = async (
   next: NextFunction
 ) => {
   try {
-    const { signature, publicAddress } = req.body;
-    if (!signature || !publicAddress)
+    const { signature, address } = req.body;
+    if (!signature || !address)
       return res
         .status(400)
-        .send({ error: "Request should have signature and publicAddress" });
+        .send({ error: "Request should have signature and address" });
 
-    // Step 1: Get the user with the given publicAddress
-    const user: User | null = await User.findByPk(publicAddress);
+    // Step 1: Get the user with the given address
+    const user: User | null = await User.findByPk(address);
     if (!user)
       return res.status(401).send({
-        error: `User with publicAddress ${publicAddress} is not found in database`,
+        error: `User with address ${address} is not found in database`,
       });
 
     // Step 2: Verify digital signature
-    // We now are in possession of msg, publicAddress and signature. We
+    // We now are in possession of msg, address and signature. We
     // will use a helper from @metamask/eth-sig-util to extract the address from the signature
-    // The signature verification is successful if the address found with
-    // sigUtil.recoverPersonalSignature matches the initial publicAddress
+    // The signature verification is successful if the recoveredAddress found with
+    // sigUtil.recoverPersonalSignature matches the initial address
     const msg = `I am signing my one-time nonce: ${user.nonce}`;
     const data = bufferToHex(Buffer.from(msg, "utf8"));
-    const address = recoverPersonalSignature({
+    const recoveredAddress = recoverPersonalSignature({
       data,
       signature,
     });
     const signatureAddressMatchesUserAddress =
-      address.toLowerCase() === publicAddress.toLowerCase();
+      recoveredAddress.toLowerCase() === address.toLowerCase();
     if (!signatureAddressMatchesUserAddress)
       return res.status(401).send({
         error: "Signature verification failed",
@@ -138,15 +138,13 @@ export const logout = async (
   next: NextFunction
 ) => {
   try {
-    const { publicAddress } = req.body;
-    if (!publicAddress)
-      return res
-        .status(400)
-        .send({ error: "Request should have publicAddress" });
+    const { address } = req.body;
+    if (!address)
+      return res.status(400).send({ error: "Request should have address" });
 
     const refreshTokens = await RefreshToken.findAll({
       where: {
-        publicAddress,
+        address,
         revoked: false,
       },
     });
@@ -188,7 +186,7 @@ export const refreshToken = async (
 
     const sub: string | undefined = decodedJWT.sub as string;
     const jwtid: string | undefined = (decodedJWT as any).jti as string;
-    const publicAddress = sub;
+    const address = sub;
 
     log("refreshing token for", sub, jwtid);
 
@@ -212,11 +210,11 @@ export const refreshToken = async (
       });
     }
 
-    const user: User | null = await User.findByPk(publicAddress);
+    const user: User | null = await User.findByPk(address);
 
     if (!user)
       return res.status(401).send({
-        error: `User with publicAddress ${publicAddress} is not found in database`,
+        error: `User with address ${address} is not found in database`,
       });
 
     const newTokenSet = await generateJWTs(user);
