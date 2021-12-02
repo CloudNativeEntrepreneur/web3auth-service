@@ -10,7 +10,10 @@
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true,
       "trace": true,
-      "envFile": "${workspaceFolder}/.local.env"
+      "envFile": "${workspaceFolder}/.local.env",
+      "env": {
+        "DATABASE_SYNC": "true"
+      }
     }
   ]
 }
