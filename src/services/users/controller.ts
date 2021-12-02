@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../../models/user.model.js";
+import { v4 as uuid } from "uuid";
 
 export const find = (req: Request, res: Response, next: NextFunction) => {
-  // If a query string ?publicAddress=... is given, then filter results
+  // If a query string ?address=... is given, then filter results
   const whereClause =
-    req.query && req.query.publicAddress
+    req.query && req.query.address
       ? {
-          where: { publicAddress: req.query.publicAddress },
+          where: { address: req.query.address },
         }
       : undefined;
 
@@ -16,13 +17,13 @@ export const find = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const get = (req: Request, res: Response, next: NextFunction) => {
-  // AccessToken publicAddress is in req.user.publicAddress
-  // PublicAddress is the param in /users/:publicAddress
-  // We only allow user accessing herself, i.e. require user.publicAddress==params.publicAddress
-  if ((req as any).user.publicAddress !== +req.params.publicAddress) {
+  // AccessToken address is in req.user.address
+  // address is the param in /users/:address
+  // We only allow user accessing herself, i.e. require user.address==params.address
+  if ((req as any).user.address !== +req.params.address) {
     return res.status(401).send({ error: "You can can only access yourself" });
   }
-  return User.findByPk(req.params.publicAddress)
+  return User.findByPk(req.params.address)
     .then((user: User | null) => res.json(user))
     .catch(next);
 };
@@ -34,10 +35,10 @@ export const create = (req: Request, res: Response, next: NextFunction) =>
 
 export const patch = (req: Request, res: Response, next: NextFunction) => {
   // Only allow to fetch current user
-  if ((req as any).user.publicAddress !== +req.params.publicAddress) {
+  if ((req as any).user.address !== +req.params.address) {
     return res.status(401).send({ error: "You can can only access yourself" });
   }
-  return User.findByPk(req.params.publicAddress)
+  return User.findByPk(req.params.address)
     .then((user: User | null) => {
       if (!user) {
         return user;
@@ -50,7 +51,7 @@ export const patch = (req: Request, res: Response, next: NextFunction) => {
       return user
         ? res.json(user)
         : res.status(401).send({
-            error: `User with publicAddress ${req.params.publicAddress} is not found in database`,
+            error: `User with address ${req.params.address} is not found in database`,
           });
     })
     .catch(next);

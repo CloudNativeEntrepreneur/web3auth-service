@@ -19,6 +19,7 @@ export const config = {
       sequelize: {
         dialect: "postgres",
         logging: true,
+        port: process.env.PG_PORT || 5432,
       },
     },
     // sqlite: {
