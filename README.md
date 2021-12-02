@@ -29,7 +29,13 @@ To run the project with VSCode's integrated debugger, click the icon with a play
 If you don't want to use the VSCode debugger, you can also run:
 
 ```
-npm run dev
+make dev-docker-compose
+```
+
+#### Against web3auth-db running in local-dev-cluster
+
+```
+make dev
 ```
 
 # FAQ
