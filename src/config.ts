@@ -11,7 +11,7 @@ export const config = {
   },
   publicURI: process.env.PUBLIC_URI || "http://localhost:8000/",
   database: {
-    sync: process.env.DATABASE_SYNC || false,
+    sync: process.env.DATABASE_SYNC === "true" ? true : false,
     postgres: {
       name: "web3auth",
       username: "web3auth",
@@ -19,7 +19,7 @@ export const config = {
       sequelize: {
         dialect: "postgres",
         logging: true,
-        port: process.env.PG_PORT || 5432,
+        port: parseInt(process.env.PG_PORT || "", 10) || 5432,
       },
     },
     // sqlite: {
