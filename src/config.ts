@@ -20,6 +20,9 @@ export const config = {
         dialect: "postgres",
         logging: true,
         port: parseInt(process.env.PG_PORT || "", 10) || 5432,
+        host:
+          process.env.PG_HOST ||
+          "web3auth-db-postgresql.default.svc.cluster.local",
       },
     },
     // sqlite: {
