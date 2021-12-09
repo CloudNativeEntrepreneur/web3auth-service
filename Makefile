@@ -13,4 +13,7 @@ install:
 dev:
 	./scripts/run-using-local-dev-cluster-db.sh
 
-onboard: install dev
+onboard: install
+
+open:
+	code .
