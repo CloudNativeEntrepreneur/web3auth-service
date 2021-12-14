@@ -20,7 +20,7 @@ const generateJWTs = async (user: User) => {
     config.jwt.secret,
     {
       algorithm: config.jwt.algorithms[0],
-      expiresIn: "2d",
+      expiresIn: "30d",
       audience: config.publicURI,
       issuer: config.publicURI,
       subject: user.address,
@@ -46,7 +46,7 @@ const generateJWTs = async (user: User) => {
     config.jwt.secret,
     {
       algorithm: config.jwt.algorithms[0],
-      expiresIn: "2d",
+      expiresIn: "30d",
       audience: config.publicURI,
       issuer: config.publicURI,
       subject: user.address,
