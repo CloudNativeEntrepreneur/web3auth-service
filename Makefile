@@ -13,7 +13,10 @@ install:
 dev:
 	./scripts/run-using-local-dev-cluster-db.sh
 
-onboard: install
+onboard: install create-env-file
+
+create-env-file:
+	./scripts/create-env-file.sh
 
 open:
 	code .

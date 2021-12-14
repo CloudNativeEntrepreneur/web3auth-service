@@ -11,9 +11,7 @@
       "sourceMaps": true,
       "trace": true,
       "envFile": "${workspaceFolder}/.local.env",
-      "env": {
-        "DATABASE_SYNC": "true"
-      }
+      "outputCapture": "std"
     }
   ]
 }
