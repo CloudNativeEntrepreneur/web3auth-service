@@ -34,7 +34,7 @@ export const create = (req: Request, res: Response, next: NextFunction) =>
 
 export const patch = (req: Request, res: Response, next: NextFunction) => {
   // Only allow to fetch current user
-  if ((req as any).user.address !== +req.params.address) {
+  if ((req as any).user.address !== req.params.address) {
     return res.status(401).send({ error: "You can can only access yourself" });
   }
   return User.findByPk(req.params.address)
