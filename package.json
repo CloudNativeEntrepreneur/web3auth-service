@@ -19,7 +19,7 @@
     "format": "prettier --write --plugin-search-dir=. ."
   },
   "dependencies": {
-    "@metamask/eth-sig-util": "4.0.0",
+    "@metamask/eth-sig-util": "4.0.1",
     "body-parser": "1.19.1",
     "cors": "2.8.5",
     "debug": "4.3.3",
