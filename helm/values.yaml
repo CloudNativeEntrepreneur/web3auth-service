@@ -10,8 +10,8 @@ podsLabels: {}
 deploymentLabels: {}
 
 image:
-  repository: draft
-  tag: dev
+  repository: ghcr.io/cloudnativeentrepreneur/web3auth-service
+  tag: latest
   pullPolicy: IfNotPresent
 
 # define environment variables here as a map of key: value
