@@ -13,8 +13,8 @@ export const config = {
   database: {
     sync: process.env.DATABASE_SYNC === "true" ? true : false,
     postgres: {
-      name: "web3auth",
-      username: "web3auth",
+      name: process.env.PG_DATABASE || "web3auth",
+      username: process.env.PG_USER || "web3auth",
       password: process.env.PG_PASS || "web3auth",
       sequelize: {
         dialect: "postgres",
@@ -22,7 +22,7 @@ export const config = {
         port: parseInt(process.env.PG_PORT || "", 10) || 5432,
         host:
           process.env.PG_HOST ||
-          "web3auth-db-postgresql.default.svc.cluster.local",
+          "example-web3auth-db-postgresql.default.svc.cluster.local",
       },
     },
     // sqlite: {
@@ -35,5 +35,22 @@ export const config = {
     //     logging: false,
     //   },
     // },
+  },
+
+  bus: {
+    aggregates: {
+      web3auth: {
+        events:
+          process.env.WEB3AUTH_EVENTS_BROKER_URL ||
+          "http://broker-ingress.knative-eventing.svc.cluster.local/default/web3auth-events",
+      },
+    },
+    source: "web3auth-service",
+  },
+
+  expirations: {
+    accessToken: process.env.EXPIRATION_ACCESS_TOKEN || "30m",
+    idToken: process.env.EXPIRATION_ID_TOKEN || "30d",
+    refreshToken: process.env.EXPIRATION_REFRESH_TOKEN || "30d",
   },
 };

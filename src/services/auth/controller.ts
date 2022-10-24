@@ -20,7 +20,7 @@ const generateJWTs = async (user: User) => {
     config.jwt.secret,
     {
       algorithm: config.jwt.algorithms[0],
-      expiresIn: "30d",
+      expiresIn: config.expirations.refreshToken,
       audience: config.publicURI,
       issuer: config.publicURI,
       subject: user.address,
@@ -39,14 +39,14 @@ const generateJWTs = async (user: User) => {
   const idToken = await jwt.sign(
     {
       address: user.address,
-      username: user.username || user.address,
+      username: encodeURI(user.username || user.address),
       roles: ["user"],
       typ: "Id",
     },
     config.jwt.secret,
     {
       algorithm: config.jwt.algorithms[0],
-      expiresIn: "30d",
+      expiresIn: config.expirations.idToken,
       audience: config.publicURI,
       issuer: config.publicURI,
       subject: user.address,
@@ -57,7 +57,7 @@ const generateJWTs = async (user: User) => {
   const accessToken = await jwt.sign(
     {
       address: user.address,
-      username: user.username || user.address,
+      username: encodeURI(user.username || user.address),
       "https://hasura.io/jwt/claims": {
         "x-hasura-user-id": user.address,
         "x-hasura-default-role": "user",
@@ -68,7 +68,7 @@ const generateJWTs = async (user: User) => {
     config.jwt.secret,
     {
       algorithm: config.jwt.algorithms[0],
-      expiresIn: "5m",
+      expiresIn: config.expirations.accessToken,
       audience: config.publicURI,
       issuer: config.publicURI,
       subject: user.address,
