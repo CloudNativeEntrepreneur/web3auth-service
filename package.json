@@ -16,7 +16,8 @@
     "dev": "dotenv -e .local.env -- nodemon",
     "start": "node ./dist/index.js",
     "lint": "prettier --check --plugin-search-dir=. . && eslint .",
-    "format": "prettier --write --plugin-search-dir=. ."
+    "format": "prettier --write --plugin-search-dir=. .",
+    "test": "echo 'Error: no test specified'"
   },
   "dependencies": {
     "@metamask/eth-sig-util": "4.0.0",
