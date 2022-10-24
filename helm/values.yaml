@@ -17,6 +17,8 @@ image:
 # define environment variables here as a map of key: value
 env:
 
+secretEnv: staging
+
 runIntegrationTests: false
 # enable this flag to use knative serve to deploy the app
 knativeDeploy: true
@@ -24,6 +26,8 @@ knative:
   minScale: 1
   maxScale: 1
   concurrencyTarget: 100
+  eventing:
+    local: false
 
 # HorizontalPodAutoscaler
 hpa:
@@ -61,7 +65,7 @@ canary:
 service:
   name: web3auth-service
   type: ClusterIP
-  internalPort: 5002
+  internalPort: 8000
   externalPort: 80
   annotations: {}
   # Add labels to the service
@@ -87,8 +91,8 @@ readinessProbe:
 
 database:
   psql:
-    name: cne-web3auth-postgresql
-    hostname: cne-web3auth-postgresql
+    name: example-web3auth-db-postgresql
+    hostname: example-web3auth-db-postgresql
     database: web3auth
     username: web3auth
 # custom ingress annotations on this service

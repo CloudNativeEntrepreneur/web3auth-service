@@ -1,0 +1,37 @@
+name: pr-close
+on:
+  pull_request:
+    types: [ closed ]
+
+jobs:
+  
+  pr-close:
+    runs-on: ubuntu-latest
+    
+    steps:
+
+    - name: downcase REPO
+      run: |
+        echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: test
+      run: |
+        echo "Test"
+
+    # - name: Setup Kube config
+    #   uses: azure/k8s-set-context@v3
+    #   with:
+    #     method: kubeconfig
+    #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+    # - name: Delete preview
+    #   run: |
+    #     # Install vCluster
+    #     curl -s -L "https://github.com/loft-sh/vcluster/releases/latest" | sed -nE 's!.*"([^"]*vcluster-linux-amd64)".*!https://github.com\1!p' | xargs -n 1 curl -L -o vcluster && chmod +x vcluster;
+    #     sudo mv vcluster /usr/local/bin;
+
+    #     # Delete the cluster
+    #     vcluster delete demo-hasura-pr-${{ github.event.pull_request.number }} --namespace prs

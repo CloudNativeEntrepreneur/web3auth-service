@@ -1,0 +1,90 @@
+name: publish-and-promote
+on:
+  push:
+    tags:
+    - v*.*.*
+jobs:
+
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: write
+
+    steps:
+
+    - name: downcase REPO
+      run: |
+        echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+    # - name: use REPO
+    #   run: echo "The value of REPO is: ${{ env.REPO }}"
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/${{ env.REPO }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        push: true
+        tags: |
+          ghcr.io/${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache
+        cache-to: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache,mode=max
+
+  promote:
+    needs: publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout production environment
+      uses: actions/checkout@v3
+      with:
+        repository: cloudnativeentrepreneur/example-prod-env
+        persist-credentials: false
+        fetch-depth: 0
+
+    - name: Update prod environment
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq -i '.spec.source.targetRevision = "${{ github.ref_name }}"' helm/templates/${{ github.event.repository.name }}.yaml
+
+    - name: Commit Prod Env Changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"   
+        git add .
+        git commit -m "feat: Promoting ${{ github.event.repository.name }} to ${{ github.ref_name }}"
+
+    - name: Push prod
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GH_ORG_TOKEN }}
+        repository: cloudnativeentrepreneur/example-prod-env
