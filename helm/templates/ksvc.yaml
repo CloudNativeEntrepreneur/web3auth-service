@@ -42,6 +42,7 @@ spec:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
         - containerPort: {{ .Values.service.internalPort }}
+          protocol: TCP
         env:
         - name: PG_USER
           valueFrom:
