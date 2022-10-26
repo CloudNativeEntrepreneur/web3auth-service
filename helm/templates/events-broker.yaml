@@ -13,7 +13,7 @@ spec:
       ref:
         apiVersion: serving.knative.dev/v1
         kind: Service
-        name: ig-dlq-service
+        name: example-dlq-service
       uri: /cloudevent/dead-letter
 {{- end }}
     retry: 5
