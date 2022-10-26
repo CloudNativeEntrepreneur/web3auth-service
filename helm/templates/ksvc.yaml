@@ -26,18 +26,18 @@ spec:
 {{ toYaml .Values.podsLabels | indent 8 }}
 {{- end }}
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: serving.knative.dev/service
-                  operator: In
-                  values:
-                  - {{ .Values.service.name }}
-              topologyKey: failure-domain.beta.kubernetes.io/zone
-            weight: 100
+      # affinity:
+      #   podAntiAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #     - podAffinityTerm:
+      #         labelSelector:
+      #           matchExpressions:
+      #           - key: serving.knative.dev/service
+      #             operator: In
+      #             values:
+      #             - {{ .Values.service.name }}
+      #         topologyKey: failure-domain.beta.kubernetes.io/zone
+      #       weight: 100
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
