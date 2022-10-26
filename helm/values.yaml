@@ -91,8 +91,8 @@ readinessProbe:
 
 database:
   psql:
-    name: example-web3auth-db-postgresql
-    hostname: example-web3auth-db-postgresql
+    name: web3auth-db-postgresql
+    hostname: web3auth-db-postgresql
     database: web3auth
     username: web3auth
 # custom ingress annotations on this service
