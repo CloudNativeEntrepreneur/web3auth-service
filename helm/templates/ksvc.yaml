@@ -1,6 +1,5 @@
-{{- if .Values.knative.eventing.local }}
+{{- if .Values.local }}
 {{- else }}
-{{- if .Values.knativeDeploy }}
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -80,5 +79,4 @@ spec:
 {{- end }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
-{{- end }}
 {{- end }}

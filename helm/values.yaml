@@ -17,7 +17,7 @@ image:
 # define environment variables here as a map of key: value
 env:
 
-secretEnv: staging
+secretStore: fake
 
 runIntegrationTests: false
 # enable this flag to use knative serve to deploy the app
@@ -26,8 +26,10 @@ knative:
   minScale: 1
   maxScale: 1
   concurrencyTarget: 100
-  eventing:
-    local: false
+
+local: false
+localKnativeSubscriber: http://host.docker.internal:8000
+localKnativeDlqSubscriber: http://host.docker.internal:3999
 
 # HorizontalPodAutoscaler
 hpa:
