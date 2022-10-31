@@ -22,7 +22,7 @@ export const config = {
         port: parseInt(process.env.PG_PORT || "", 10) || 5432,
         host:
           process.env.PG_HOST ||
-          "example-web3auth-db-postgresql.default.svc.cluster.local",
+          "web3auth-db-postgresql.example-local-env.svc.cluster.local",
       },
     },
     // sqlite: {
@@ -42,7 +42,7 @@ export const config = {
       web3auth: {
         events:
           process.env.WEB3AUTH_EVENTS_BROKER_URL ||
-          "http://broker-ingress.knative-eventing.svc.cluster.local/default/web3auth-events",
+          "http://broker-ingress.knative-eventing.svc.cluster.local/example-local-env/web3auth-events",
       },
     },
     source: "web3auth-service",

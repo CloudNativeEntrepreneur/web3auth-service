@@ -18,17 +18,10 @@ install:
 dev:
 	./scripts/run-using-local-dev-cluster-db.sh
 
-onboard: install create-env-file deploy-to-local-cluster
+onboard: install create-env-file
 
 create-env-file:
 	./scripts/create-env-file.sh
 
 open:
 	code .
-
-deploy-to-local-cluster:
-	kubectl ctx $(LOCAL_DEV_CLUSTER)
-	helm template helm/ \
-		-f helm/values.yaml \
-		--set image.repository=dev.local/$(SERVICE_NAME),image.tag=$(NOW),local=true \
-		| kubectl apply -f -
