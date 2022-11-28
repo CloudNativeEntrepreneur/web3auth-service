@@ -16,7 +16,7 @@ jobs:
     with:
       environment_repository: CloudNativeEntrepreneur/example-local-env
       project: example-local-env
-      pull_request: true
+      pull_request: false
       name: example-web3auth-service
       values: |
         # Set from promote job of CloudNativeEntrepreneur/web3auth-service
@@ -28,5 +28,5 @@ jobs:
     with:
       environment_repository: CloudNativeEntrepreneur/example-prod-env
       project: example-prod-env
-      pull_request: true
+      pull_request: false
       name: example-web3auth-service
