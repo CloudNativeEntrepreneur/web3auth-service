@@ -1,0 +1,5 @@
+name: web3auth-service
+version: HEAD
+project: dev
+repository: CloudNativeEntrepreneur/web3auth-service
+values: ""

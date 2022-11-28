@@ -1,0 +1,6 @@
+name: web3auth-service
+pr: pr-0
+headRef: HEAD
+tag: latest
+repository: CloudNativeEntrepreneur/web3auth-service
+project: dev

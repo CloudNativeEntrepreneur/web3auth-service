@@ -1,0 +1,6 @@
+# Helm chart.yaml
+apiVersion: v1
+appVersion: "1.0"
+description: Config to promote
+name: web3auth-service-promote
+version: v0.0.0-dev
