@@ -36,7 +36,6 @@ jobs:
     secrets: inherit
     with:
       container: true
-      integrationTestsContainer: true
       environment_repository: CloudNativeEntrepreneur/example-preview-envs
       project: example-preview-envs
       comment: |

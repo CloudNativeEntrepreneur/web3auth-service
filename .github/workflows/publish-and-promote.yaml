@@ -9,8 +9,6 @@ jobs:
   publish-container:
     uses: CloudNativeEntrepreneur/actions/.github/workflows/publish-container.yaml@main
     secrets: inherit
-    with:
-      integrationTestsContainer: true
 
   promote-local:
     uses: CloudNativeEntrepreneur/actions/.github/workflows/gitops-promote-helm.yaml@main
