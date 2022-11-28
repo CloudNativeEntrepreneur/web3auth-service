@@ -41,7 +41,7 @@ jobs:
       comment: |
         Your preview environment has been published! :rocket:
 
-        It may take a few minutes to spin up, but you can view it here once it's ready: [${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-preview](http://${{ github.event.repository.name }}.example-ui-pr-${{ github.event.pull_request.number }}-preview.127.0.0.1.sslip.io)
+        It may take a few minutes to spin up, but you can view it here once it's ready: [${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-preview](http://${{ github.event.repository.name }}.${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-preview.127.0.0.1.sslip.io)
 
         You can verify the PR is ready with `kubectl`:
         ```bash
