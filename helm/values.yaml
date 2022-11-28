@@ -8,17 +8,13 @@ podAnnotations: {}
 podsLabels: {}
 # Add labels to the deployment
 deploymentLabels: {}
-
 image:
   repository: ghcr.io/cloudnativeentrepreneur/web3auth-service
-  tag: latest
+  tag: v0.28.3
   pullPolicy: IfNotPresent
-
 # define environment variables here as a map of key: value
 env:
-
 secretStore: fake
-
 runIntegrationTests: false
 # enable this flag to use knative serve to deploy the app
 knativeDeploy: true
@@ -26,11 +22,9 @@ knative:
   minScale: 1
   maxScale: 1
   concurrencyTarget: 100
-
 local: false
 localKnativeSubscriber: http://host.docker.internal:8000
 localKnativeDlqSubscriber: http://host.docker.internal:3999
-
 # HorizontalPodAutoscaler
 hpa:
   enabled: false
@@ -40,7 +34,6 @@ hpa:
   memoryTargetAverageUtilization: 80
   # Add labels to the HPA
   labels: {}
-
 # Canary deployments
 # If enabled, Istio and Flagger need to be installed in the cluster
 canary:
@@ -63,7 +56,6 @@ canary:
   labels: {}
   # Add labels to the canary gateway
   gatewayLabels: {}
-
 service:
   name: web3auth-service
   type: ClusterIP
@@ -90,7 +82,6 @@ readinessProbe:
   periodSeconds: 1
   successThreshold: 1
   timeoutSeconds: 1
-
 database:
   psql:
     name: web3auth-db-postgresql
@@ -104,15 +95,13 @@ ingress:
   classAnnotation: ""
   # Add labels to the ingress
   labels: {}
-
   # ingress path type
   pathType: ImplementationSpecific
-
 serviceAccount:
   enabled: true
   name: ""
   annotations: {}
-#    iam.gke.io/gcp-service-account: my-sa-in-gke
+  #    iam.gke.io/gcp-service-account: my-sa-in-gke
   # Add labels to the SA
   labels: {}
 #    my-custom-label: value
@@ -125,7 +114,6 @@ jxRequirements:
     #  kubernetes.io/ingress.class: nginx
 
     apiVersion: "networking.k8s.io/v1"
-
     # the domain for hosts
     domain: ""
     externalDNS: false
