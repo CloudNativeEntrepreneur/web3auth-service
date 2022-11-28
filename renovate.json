@@ -1,3 +1,9 @@
 {
-  "extends": ["config:base"]
+  "extends": ["config:base"],
+  "argocd": {
+    "fileMatch": [
+      "preview/helm/templates/.+\\.yaml$",
+      "promote/helm/templates/.+\\.yaml$"
+    ]
+  }
 }
