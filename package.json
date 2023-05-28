@@ -45,7 +45,7 @@
     "@types/express-jwt": "6.0.4",
     "@types/jsonwebtoken": "8.5.8",
     "@types/uuid": "8.3.4",
-    "@types/validator": "13.7.1",
+    "@types/validator": "13.7.17",
     "@typescript-eslint/eslint-plugin": "5.10.1",
     "dotenv-cli": "4.1.1",
     "eslint": "8.7.0",
