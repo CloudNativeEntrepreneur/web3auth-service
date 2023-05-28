@@ -1,0 +1,36 @@
+name: main
+on:
+  push:
+    branches:
+    - main
+jobs:
+
+  helm-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/helm-quality.yaml@main
+    with:
+      helm_path: helm
+  
+  preview-helm-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/helm-quality.yaml@main
+    with:
+      helm_path: preview/helm
+
+  promote-helm-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/helm-quality.yaml@main
+    with:
+      helm_path: promote/helm
+
+  node-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/node-quality.yaml@main
+
+  release:
+    needs:
+    - helm-quality
+    - preview-helm-quality
+    - promote-helm-quality
+    - node-quality
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/github-release.yaml@main
+    secrets: inherit
+    with:
+      helm: true
+      container: true

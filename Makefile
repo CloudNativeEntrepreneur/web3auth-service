@@ -1,3 +1,8 @@
+LOCAL_DEV_CLUSTER ?= rancher-desktop
+NOW := $(shell date +%m_%d_%Y_%H_%M)
+SERVICE_NAME := web3auth-service
+DEBUG ?= web3auth*,knativebus*,example*
+
 up:
 	docker-compose up -d
 

@@ -10,12 +10,14 @@ podsLabels: {}
 deploymentLabels: {}
 
 image:
-  repository: draft
-  tag: dev
+  repository: ghcr.io/cloudnativeentrepreneur/web3auth-service
+  tag: latest
   pullPolicy: IfNotPresent
 
 # define environment variables here as a map of key: value
 env:
+
+secretStore: fake
 
 runIntegrationTests: false
 # enable this flag to use knative serve to deploy the app
@@ -24,6 +26,10 @@ knative:
   minScale: 1
   maxScale: 1
   concurrencyTarget: 100
+
+local: false
+localKnativeSubscriber: http://host.docker.internal:8000
+localKnativeDlqSubscriber: http://host.docker.internal:3999
 
 # HorizontalPodAutoscaler
 hpa:
@@ -61,7 +67,7 @@ canary:
 service:
   name: web3auth-service
   type: ClusterIP
-  internalPort: 5002
+  internalPort: 8000
   externalPort: 80
   annotations: {}
   # Add labels to the service
@@ -87,8 +93,8 @@ readinessProbe:
 
 database:
   psql:
-    name: cne-web3auth-postgresql
-    hostname: cne-web3auth-postgresql
+    name: web3auth-db-postgresql
+    hostname: web3auth-db-postgresql
     database: web3auth
     username: web3auth
 # custom ingress annotations on this service

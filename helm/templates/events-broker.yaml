@@ -1,0 +1,21 @@
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  name: web3auth-events
+  annotations:
+      eventing.knative.dev/broker.class: MTChannelBasedBroker
+spec:
+  delivery:
+    deadLetterSink:
+{{- if .Values.local }}
+      uri: {{ .Values.localKnativeDlqSubscriber }}/cloudevent/dead-letter
+{{- else }}
+      ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: example-dlq-service
+      uri: /cloudevent/dead-letter
+    retry: 5
+    backoffPolicy: exponential
+    backoffDelay: PT1S
+{{- end }}
