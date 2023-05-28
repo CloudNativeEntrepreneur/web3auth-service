@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.name }}-{{ .Values.pr }}-preview-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.project }}
+  source:
+    path: helm
+    repoURL: https://github.com/{{ .Values.repository }}.git
+    targetRevision: {{ .Values.headRef }}
+    helm:
+      version: v3
+      values: |
+        image:
+          tag: {{ .Values.tag }}
+  destination:
+    namespace: {{ .Values.name }}-{{ .Values.pr }}-preview
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true

@@ -1,0 +1,12 @@
+name: pr-close
+on:
+  pull_request:
+    types: [ closed ]
+
+jobs:
+  
+  preview-cleanup:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/gitops-preview-cleanup.yaml@main
+    secrets: inherit
+    with:
+      environment_repository: CloudNativeEntrepreneur/example-preview-envs
