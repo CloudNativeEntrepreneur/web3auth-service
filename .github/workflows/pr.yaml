@@ -1,0 +1,49 @@
+name: pr
+
+on:
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  helm-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/helm-quality.yaml@main
+    with:
+      helm_path: helm
+  
+  preview-helm-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/helm-quality.yaml@main
+    with:
+      helm_path: preview/helm
+
+  promote-helm-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/helm-quality.yaml@main
+    with:
+      helm_path: promote/helm
+
+  node-quality:
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/node-quality.yaml@main
+
+  preview:
+    needs:
+    - helm-quality
+    - preview-helm-quality
+    - promote-helm-quality
+    - node-quality
+    uses: CloudNativeEntrepreneur/actions/.github/workflows/gitops-preview.yaml@main
+    secrets: inherit
+    with:
+      container: true
+      environment_repository: CloudNativeEntrepreneur/example-preview-envs
+      project: example-preview-envs
+      comment: |
+        Your preview environment has been published! :rocket:
+
+        It may take a few minutes to spin up, but you can view it here once it's ready: [${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-preview](http://${{ github.event.repository.name }}.${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-preview.127.0.0.1.sslip.io)
+
+        You can verify the PR is ready with `kubectl`:
+        ```bash
+        kubectl get ksvc -n ${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-preview
+        ```

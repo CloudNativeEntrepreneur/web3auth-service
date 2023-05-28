@@ -5,7 +5,7 @@ dist/**
 node_modules/**
 .husky/**
 .lighthouse/**
-charts/**
+helm/**
 preview/**
 .gitignore
 src/lib/env.js

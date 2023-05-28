@@ -1,4 +1,5 @@
-{{- if .Values.knativeDeploy }}
+{{- if .Values.local }}
+{{- else }}
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -9,7 +10,6 @@ metadata:
 {{- end }}
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    networking.knative.dev/visibility: cluster-local
 {{- if .Values.service.labels }}
 {{ toYaml .Values.service.labels | indent 4 }}
 {{- end }}
@@ -25,46 +25,58 @@ spec:
 {{ toYaml .Values.podsLabels | indent 8 }}
 {{- end }}
     spec:
+      # affinity:
+      #   podAntiAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #     - podAffinityTerm:
+      #         labelSelector:
+      #           matchExpressions:
+      #           - key: serving.knative.dev/service
+      #             operator: In
+      #             values:
+      #             - {{ .Values.service.name }}
+      #         topologyKey: failure-domain.beta.kubernetes.io/zone
+      #       weight: 100
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
         - containerPort: {{ .Values.service.internalPort }}
+          protocol: TCP
         env:
-        - name: POSTGRES_USERNAME
+        - name: PG_USER
           valueFrom:
             secretKeyRef:
               name: {{ .Values.database.psql.username }}.{{ .Values.database.psql.name }}.credentials.postgresql.acid.zalan.do
               key: username
-        - name: POSTGRES_PASSWORD
+        - name: PG_PASS
           valueFrom:
             secretKeyRef:
               name: {{ .Values.database.psql.username }}.{{ .Values.database.psql.name }}.credentials.postgresql.acid.zalan.do
               key: password
-        - name: POSTGRES_DATABASE
+        - name: PG_DATABASE
           value: {{ .Values.database.psql.database }}
-        - name: POSTGRES_HOST
+        - name: PG_HOST
           value: {{ .Values.database.psql.hostname }}.{{ .Release.Namespace }}.svc.cluster.local
-        - name: POSTGRES_PORT
+        - name: PG_PORT
           value: "5432"
-        - name: POSTGRESQL_URL
-          value: postgres://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DATABASE)
+        - name: PGSSLMODE
+          value: no-verify
+        - name: CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: web3auth
+              key: clientId
+        - name: CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: web3auth
+              key: clientSecret
+        - name: WEB3AUTH_EVENTS_BROKER_URL
+          value: http://broker-ingress.knative-eventing.svc.cluster.local/{{ .Release.Namespace }}/web3auth-events
 {{- range $pkey, $pval := .Values.env }}
         - name: {{ $pkey }}
           value: {{ quote $pval }}
 {{- end }}
-        livenessProbe:
-          httpGet:
-            path: {{ .Values.livenessProbe.probePath | default .Values.probePath }}
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-          successThreshold: {{ .Values.livenessProbe.successThreshold }}
-          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-        readinessProbe:
-          httpGet:
-            path: {{ .Values.livenessProbe.probePath | default .Values.probePath }}
-          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-          successThreshold: {{ .Values.readinessProbe.successThreshold }}
-          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
 {{- end }}

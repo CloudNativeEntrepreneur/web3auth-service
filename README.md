@@ -59,7 +59,7 @@ When it's more fully featured, such as the ability to configure custom claims ma
 Using the template function through github would make getting updates hard, so instead, fork this repo, and clone down your fork. Then add this repo as a "remote" so you can pull updates from it like:
 
 ```
-git remote add source git@github.com:CloudNativeEntrepreneur/web3auth-service.git
+git remote add source git@github.com:cloudnativeentrepreneur/web3auth-service.git
 git fetch --all
 git rebase source/master --autostash
 ```
